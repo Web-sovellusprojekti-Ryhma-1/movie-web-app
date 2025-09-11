@@ -1,35 +1,58 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import {Box, Grid, MantineProvider, Title} from "@mantine/core";
+import "@mantine/core/styles.css";
+import {MovieCard} from "./components/MovieCard.tsx";
+import DefaultLayout from "./layouts/DefaultLayout.tsx";
+
+const movies = [
+    {
+        title: "The Shawshank Redemption",
+        poster: "https://m.media-amazon.com/images/M/MV5BNDE3ODcxYzMtY2YzZC00NmNlLWJiNDMtZDViZWM2MzIxZDYwXkEyXkFqcGdeQXVyNjAwNDUxODI@._V1_SX300.jpg",
+        year: 1994,
+        genre: ["Drama", "Crime"],
+        rating: 9.3,
+        duration: 142,
+        description: "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
+        director: "Frank Darabont"
+    },
+    {
+        title: "The Dark Knight",
+        poster: "https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_SX300.jpg",
+        year: 2008,
+        genre: ["Action", "Crime", "Drama"],
+        rating: 9.0,
+        duration: 152,
+        description: "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.",
+        director: "Christopher Nolan"
+    },
+];
 
 function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    return (
+        <MantineProvider>
+            <DefaultLayout>
+                <Box p={20}>
+                    <Title order={1} mb="xl">Movies</Title>
+                    <Grid>
+                        {movies.map((movie, index) => (
+                            <Grid.Col key={index} span={{base: 12, sm: 6, md: 4, lg: 3}}>
+                                <MovieCard
+                                    title={movie.title}
+                                    poster={movie.poster}
+                                    year={movie.year}
+                                    genre={movie.genre}
+                                    rating={movie.rating}
+                                    duration={movie.duration}
+                                    description={movie.description}
+                                    director={movie.director}
+                                    onDetailsClick={() => console.log(`Details clicked for ${movie.title}`)}
+                                />
+                            </Grid.Col>
+                        ))}
+                    </Grid>
+                </Box>
+            </DefaultLayout>
+        </MantineProvider>
+    )
 }
 
 export default App

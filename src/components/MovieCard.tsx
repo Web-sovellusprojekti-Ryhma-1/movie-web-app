@@ -1,0 +1,102 @@
+import {Badge, Button, Card, Group, Image, Rating, Stack, Text, Tooltip} from "@mantine/core";
+import {IconCalendar, IconClock, IconStar} from "@tabler/icons-react";
+
+interface MovieCardProps {
+    title: string;
+    poster: string;
+    year: number;
+    genre: string[];
+    rating: number;
+    duration: number;
+    description: string;
+    director?: string;
+    onDetailsClick?: () => void;
+}
+
+export function MovieCard({
+                              title,
+                              poster,
+                              year,
+                              genre,
+                              rating,
+                              duration,
+                              description,
+                              director,
+                              onDetailsClick
+                          }: MovieCardProps) {
+    return (
+        <Card shadow="sm" padding="lg" radius="md" withBorder style={{maxWidth: 350}}>
+            <Card.Section>
+                <Image
+                    src={poster}
+                    height={400}
+                    alt={`${title} poster`}
+                    fallbackSrc="https://via.placeholder.com/350x400?text=No+Image"
+                />
+            </Card.Section>
+
+            <Stack gap="sm" mt="md">
+                <Group justify="space-between" align="flex-start">
+                    <Text fw={500} size="lg" lineClamp={2}>
+                        {title}
+                    </Text>
+                    <Tooltip label={`${rating}/10`}>
+                        <Badge
+                            color={rating >= 7 ? "green" : rating >= 5 ? "yellow" : "red"}
+                            variant="filled"
+                            leftSection={<IconStar size={12}/>}
+                        >
+                            {rating.toFixed(1)}
+                        </Badge>
+                    </Tooltip>
+                </Group>
+
+                {director && (
+                    <Text size="sm" c="dimmed">
+                        Directed by {director}
+                    </Text>
+                )}
+
+                <Group gap="xs">
+                    <Group gap={4}>
+                        <IconCalendar size={14}/>
+                        <Text size="sm" c="dimmed">
+                            {year}
+                        </Text>
+                    </Group>
+                    <Group gap={4}>
+                        <IconClock size={14}/>
+                        <Text size="sm" c="dimmed">
+                            {Math.floor(duration / 60)}h {duration % 60}m
+                        </Text>
+                    </Group>
+                </Group>
+
+                <Group gap="xs">
+                    {genre.slice(0, 3).map((g, index) => (
+                        <Badge key={index} variant="light" size="sm">
+                            {g}
+                        </Badge>
+                    ))}
+                    {genre.length > 3 && (
+                        <Badge variant="light" size="sm" color="gray">
+                            +{genre.length - 3}
+                        </Badge>
+                    )}
+                </Group>
+
+                <Text size="sm" c="dimmed" lineClamp={3}>
+                    {description}
+                </Text>
+
+                <Rating value={rating / 2} fractions={2} readOnly size="sm"/>
+
+                <Group grow>
+                    <Button variant="outline" onClick={onDetailsClick}>
+                        Details
+                    </Button>
+                </Group>
+            </Stack>
+        </Card>
+    );
+}
