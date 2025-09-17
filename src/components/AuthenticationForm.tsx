@@ -1,16 +1,28 @@
-import {Anchor, Button, Checkbox, Group, Paper, PasswordInput, Stack, Text, TextInput} from '@mantine/core';
+import {Anchor, Button, Group, Paper, PasswordInput, Stack, Text, TextInput} from '@mantine/core';
 import type { PaperProps } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { upperFirst, useToggle } from '@mantine/hooks';
+import { useEffect } from 'react';
 
-export function LoginForm(props: PaperProps, ) {
+interface AuthenticationProps extends PaperProps {
+  initType: 'login' | 'register'
+}
+
+export function AuthenticationForm({ initType, ...props}: AuthenticationProps ) {
   const [type, toggle] = useToggle(['login', 'register']);
+
+
+  useEffect(() => {
+    if (initType !== type) {
+      toggle(initType)
+    }
+  }, [initType]);
+
   const form = useForm({
     initialValues: {
       email: '',
       name: '',
       password: '',
-      terms: false,
     },
 
     validate: {
@@ -55,15 +67,11 @@ export function LoginForm(props: PaperProps, ) {
             onChange={(event) => form.setFieldValue('password', event.currentTarget.value)}
             error={form.errors.password && 'Password should include at least 6 characters'}
             radius="md"
-          />
-
-          {type === 'register' && (
-            <Checkbox
-              label="I accept terms and conditions"
-              checked={form.values.terms}
-              onChange={(event) => form.setFieldValue('terms', event.currentTarget.checked)}
-            />
-          )}
+          /> 
+          
+          
+          
+          
         </Stack>
 
         <Group justify="space-between" mt="xl">

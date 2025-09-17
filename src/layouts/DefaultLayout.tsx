@@ -2,11 +2,13 @@ import {Autocomplete, Box, Button, Group, Text, Modal,} from '@mantine/core';
 import {IconSearch} from "@tabler/icons-react";
 import * as React from "react";
 import classes from './DefaultLayout.module.css';
-import { LoginForm } from '../components/AuthenticationForm';
+import { AuthenticationForm } from '../components/AuthenticationForm.tsx';
 import { useDisclosure } from '@mantine/hooks';
+import { useState } from 'react';
 
 const DefaultLayout = ({children}: React.PropsWithChildren) => {
     const [opened, { open, close }] = useDisclosure(false);
+    const [type, setType] = useState<'login' | 'register'>('login')
 
     return (
         <>
@@ -25,15 +27,15 @@ const DefaultLayout = ({children}: React.PropsWithChildren) => {
                             <Button variant="gradient">Search</Button>
                         </Group>
                         <Group visibleFrom="sm">
-                            <Button variant="default" onClick={open}>Log in</Button>
-                            <Button onClick={open}>Sign up</Button>
+                            <Button variant="default" onClick={() => { setType('login'); open();}}>Log in</Button>
+                            <Button onClick={() => { setType('register'); open();}}>Sign up</Button>
                         </Group>
                     </Group>
                 </header>
                 {children}
             </Box>
             <Modal opened={opened} onClose={close} title="Authentication">
-                <LoginForm />
+                <AuthenticationForm initType={type} shadow="lg" />
             </Modal>
         </>
     );
