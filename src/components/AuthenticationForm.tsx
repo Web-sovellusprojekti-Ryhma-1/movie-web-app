@@ -11,7 +11,7 @@ interface AuthenticationProps extends PaperProps {
 
 export function AuthenticationForm({ initType, ...props}: AuthenticationProps ) {
   const [type, toggle] = useToggle(['login', 'register']);
-  const { SignUp } = UseAuth()
+  const { SignUp, Login, user } = UseAuth()
 
   useEffect(() => {
     if (initType !== type) {
@@ -41,9 +41,27 @@ export function AuthenticationForm({ initType, ...props}: AuthenticationProps ) 
           password: form.values.password
         }
       })
+      .then(Response => {
+        console.log("Sign up succesful")
+        toggle('login')
+      })
+      .catch(error => {
+        alert(error)
+      })
     }
     else {
-      console.log("Login")
+      Login({
+        user: {
+          email: form.values.email,
+          password: form.values.password
+        }
+      })
+      .then(Response => {
+        console.log("Sign in succesful")
+      })
+      .catch(error => {
+        alert(error)
+      })
     }
   }
 
