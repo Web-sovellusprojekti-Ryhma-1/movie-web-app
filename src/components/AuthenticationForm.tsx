@@ -3,6 +3,7 @@ import type { PaperProps } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { upperFirst, useToggle } from '@mantine/hooks';
 import { useEffect } from 'react';
+import { UseAuth } from '../contexts/AuthProvider';
 
 interface AuthenticationProps extends PaperProps {
   initType: 'login' | 'register'
@@ -10,7 +11,7 @@ interface AuthenticationProps extends PaperProps {
 
 export function AuthenticationForm({ initType, ...props}: AuthenticationProps ) {
   const [type, toggle] = useToggle(['login', 'register']);
-
+  const { SignUp } = UseAuth()
 
   useEffect(() => {
     if (initType !== type) {
@@ -27,9 +28,24 @@ export function AuthenticationForm({ initType, ...props}: AuthenticationProps ) 
 
     validate: {
       email: (val) => (/^\S+@\S+$/.test(val) ? null : 'Invalid email'),
-      password: (val) => (val.length <= 6 ? 'Password should include at least 6 characters' : null),
+      password: (val) => (val.length < 6 ? 'Password should include at least 6 characters' : null),
     },
   });
+
+  const handleSubmit = async () => {
+    if (type === 'register') {
+      SignUp({
+        user: {
+          username: form.values.name,
+          email: form.values.email,
+          password: form.values.password
+        }
+      })
+    }
+    else {
+      console.log("Login")
+    }
+  }
 
   return (
     <Paper radius="md" p="lg" withBorder {...props}>
@@ -37,7 +53,9 @@ export function AuthenticationForm({ initType, ...props}: AuthenticationProps ) 
         Welcome to Mantine, {type} with
       </Text>
 
-      <form onSubmit={form.onSubmit(() => {})}>
+      <form onSubmit={form.onSubmit(() => {
+        handleSubmit()
+      })}>
         <Stack>
           {type === 'register' && (
             <TextInput
