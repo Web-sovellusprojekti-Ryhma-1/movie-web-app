@@ -11,7 +11,7 @@ interface AuthenticationProps extends PaperProps {
 
 export function AuthenticationForm({ initType, ...props}: AuthenticationProps ) {
   const [type, toggle] = useToggle(['login', 'register']);
-  const { SignUp, Login, user } = UseAuth()
+  const { SignUp, Login } = UseAuth()
 
   useEffect(() => {
     if (initType !== type) {
