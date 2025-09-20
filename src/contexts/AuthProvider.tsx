@@ -1,4 +1,5 @@
-import React, { useState, useContext } from 'react'
+import { useState, useContext, createContext } from 'react'
+import type { ReactNode } from 'react';
 import { SignUpService, LoginService } from '../api/Auth.ts';
 
 export interface SignUpType {
@@ -16,16 +17,18 @@ interface AuthContextType {
   LogOut: () => Promise<void>
 }
 
-const AuthContext = React.createContext<AuthContextType>(
-    { user: null, SignUp: async () => {}, Login: async () => {}, LogOut: async () => {} })
+const AuthContext = createContext<AuthContextType>(
+    { user: null, SignUp: async () => {}, Login: async () => {}, LogOut: async () => {} }
+)
 
 export function UseAuth() {
   return useContext(AuthContext);
 }
 
-export function AuthProvider({children}: {children: React.ReactNode}) {
+export function AuthProvider({children}: {children: ReactNode}) {
     const userFromStorage = sessionStorage.getItem('user')
 
+    // Get user from session storage if it exists
     const [user, setUser] = useState(userFromStorage ? JSON.parse(userFromStorage) : null)
 
     const SignUp = async (userData: SignUpType) => {
@@ -44,6 +47,7 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
         sessionStorage.removeItem('user')
     }
 
+    
     return (
         <AuthContext.Provider value={{user, SignUp, Login, LogOut}}>
             {children}

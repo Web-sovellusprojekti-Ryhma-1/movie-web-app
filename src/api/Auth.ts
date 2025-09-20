@@ -1,4 +1,4 @@
-import { axiosPrivate } from '../lib/Axios'
+import { axiosPrivate } from './Axios.ts'
 import type { SignUpType, LoginType } from '../contexts/AuthProvider'
 
 export const SignUpService = async (userData: SignUpType) => {

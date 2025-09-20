@@ -1,15 +1,16 @@
 import {Anchor, Button, Group, Paper, PasswordInput, Stack, Text, TextInput} from '@mantine/core';
 import type { PaperProps } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { upperFirst, useToggle } from '@mantine/hooks';
+import { upperFirst, useDisclosure, useToggle } from '@mantine/hooks';
 import { useEffect } from 'react';
 import { UseAuth } from '../contexts/AuthProvider';
 
 interface AuthenticationProps extends PaperProps {
   initType: 'login' | 'register'
+  onClose: () => void
 }
 
-export function AuthenticationForm({ initType, ...props}: AuthenticationProps ) {
+export function AuthenticationForm({ initType, onClose, ...props}: AuthenticationProps ) {
   const [type, toggle] = useToggle(['login', 'register']);
   const { SignUp, Login } = UseAuth()
 
@@ -43,6 +44,9 @@ export function AuthenticationForm({ initType, ...props}: AuthenticationProps ) 
       })
       .then(Response => {
         console.log("Sign up succesful")
+        form.setFieldValue('name', '')
+        form.setFieldValue('email', '')
+        form.setFieldValue('password', '')
         toggle('login')
       })
       .catch(error => {
@@ -58,6 +62,7 @@ export function AuthenticationForm({ initType, ...props}: AuthenticationProps ) 
       })
       .then(Response => {
         console.log("Sign in succesful")
+        onClose()
       })
       .catch(error => {
         alert(error)
@@ -68,7 +73,7 @@ export function AuthenticationForm({ initType, ...props}: AuthenticationProps ) 
   return (
     <Paper radius="md" p="lg" withBorder {...props}>
       <Text size="lg" fw={500}>
-        Welcome to Mantine, {type} with
+        Welcome to Movie App, {type} with
       </Text>
 
       <form onSubmit={form.onSubmit(() => {
@@ -78,7 +83,7 @@ export function AuthenticationForm({ initType, ...props}: AuthenticationProps ) 
           {type === 'register' && (
             <TextInput
               label="Name"
-              placeholder="Your name"
+              placeholder="Your username"
               value={form.values.name}
               onChange={(event) => form.setFieldValue('name', event.currentTarget.value)}
               radius="md"
@@ -88,7 +93,7 @@ export function AuthenticationForm({ initType, ...props}: AuthenticationProps ) 
           <TextInput
             required
             label="Email"
-            placeholder="hello@mantine.dev"
+            placeholder="Your email address"
             value={form.values.email}
             onChange={(event) => form.setFieldValue('email', event.currentTarget.value)}
             error={form.errors.email && 'Invalid email'}

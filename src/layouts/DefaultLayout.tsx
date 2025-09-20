@@ -14,6 +14,7 @@ const DefaultLayout = ({children}: React.PropsWithChildren) => {
 
     const { user, LogOut } = UseAuth()
 
+    // Log out button becomes visible when user has logged in
     useEffect (() => {
         if (user !== null) {
             setLogOutButtonVisible(true)
@@ -52,7 +53,7 @@ const DefaultLayout = ({children}: React.PropsWithChildren) => {
                 {children}
             </Box>
             <Modal opened={opened} onClose={close} title="Authentication">
-                <AuthenticationForm initType={type} shadow="lg" />
+                <AuthenticationForm initType={type} shadow="lg" onClose={close} />
             </Modal>
         </>
     );
