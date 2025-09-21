@@ -21,7 +21,7 @@ const App: React.FC = () => {
   // backendistä haetaan elokuvat huom portti taikka osote
   const search = () => {
     fetch(
-      `http://localhost:5000/api/search?query=${encodeURIComponent(
+      `http://localhost:5000/api/tmdb/search?query=${encodeURIComponent(
         query
       )}&page=${page}`
     )
@@ -37,7 +37,7 @@ const App: React.FC = () => {
 
   // haetaan elokuvan tiedot backendistä idn mukaan
   const fetchMovieDetails = (id: number) => {
-    fetch(`http://localhost:5000/api/movie/${id}`)
+    fetch(`http://localhost:5000/api/tmdb/movie/${id}`)
       .then((response) => response.json())
       .then((json) => {
         setSelectedMovie(json);
