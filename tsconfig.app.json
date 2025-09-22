@@ -23,5 +23,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src", "../movie-app-backend/apis/finnkino.js"]
+  "include": ["src", "../movie-app-backend/apis/finnkinoapi.js"]
 }

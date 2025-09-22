@@ -2,6 +2,8 @@ import {Box, Grid, MantineProvider, Title} from "@mantine/core";
 import "@mantine/core/styles.css";
 import {MovieCard} from "./components/MovieCard.tsx";
 import DefaultLayout from "./layouts/DefaultLayout.tsx";
+import React from "react";
+import TheatreAreas from "./components/TheatreAreasfromFinnkino.tsx";
 
 const movies = [
     {
@@ -32,6 +34,8 @@ function App() {
             <DefaultLayout>
                 <Box p={20}>
                     <Title order={1} mb="xl">Movies</Title>
+                    
+                    <TheatreAreas />
                     <Grid>
                         {movies.map((movie, index) => (
                             <Grid.Col key={index} span={{base: 12, sm: 6, md: 4, lg: 3}}>
