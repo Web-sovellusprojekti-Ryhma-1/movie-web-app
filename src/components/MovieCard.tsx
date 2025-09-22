@@ -1,5 +1,5 @@
 import {Badge, Button, Card, Group, Image, Rating, Stack, Text, Tooltip} from "@mantine/core";
-import {IconCalendar, IconClock, IconStar} from "@tabler/icons-react";
+import {IconCalendar, IconClock} from "@tabler/icons-react";
 
 interface MovieCardProps {
     title: string;
@@ -24,8 +24,10 @@ export function MovieCard({
                               director,
                               onDetailsClick
                           }: MovieCardProps) {
+    const ratingValue = rating / 2;
+
     return (
-        <Card shadow="sm" padding="lg" radius="md" withBorder style={{maxWidth: 350}}>
+        <Card shadow="sm" padding="lg" radius="md" withBorder>
             <Card.Section>
                 <Image
                     src={poster}
@@ -36,19 +38,23 @@ export function MovieCard({
             </Card.Section>
 
             <Stack gap="sm" mt="md">
-                <Group justify="space-between" align="flex-start">
-                    <Text fw={500} size="lg" lineClamp={2}>
-                        {title}
-                    </Text>
-                    <Tooltip label={`${rating}/10`}>
-                        <Badge
-                            color={rating >= 7 ? "green" : rating >= 5 ? "yellow" : "red"}
-                            variant="filled"
-                            leftSection={<IconStar size={12}/>}
-                        >
-                            {rating.toFixed(1)}
-                        </Badge>
-                    </Tooltip>
+                <Text fw={500} size="lg" lineClamp={2}>
+                    {title}
+                </Text>
+                <Tooltip label={`${rating.toFixed(1)} / 10`}>
+                    <div>
+                        <Rating value={ratingValue} fractions={2} readOnly/>
+                    </div>
+                </Tooltip>
+                <Group gap="sm" align="center">
+                    <Group gap={4} align="center">
+                        <IconCalendar size={14} color="var(--mantine-color-dimmed)"/>
+                        <Text size="sm" c="dimmed">{year}</Text>
+                    </Group>
+                    <Group gap={4} align="center">
+                        <IconClock size={14} color="var(--mantine-color-dimmed)"/>
+                        <Text size="sm" c="dimmed">{Math.floor(duration / 60)}h {duration % 60}m</Text>
+                    </Group>
                 </Group>
 
                 {director && (
@@ -58,30 +64,11 @@ export function MovieCard({
                 )}
 
                 <Group gap="xs">
-                    <Group gap={4}>
-                        <IconCalendar size={14}/>
-                        <Text size="sm" c="dimmed">
-                            {year}
-                        </Text>
-                    </Group>
-                    <Group gap={4}>
-                        <IconClock size={14}/>
-                        <Text size="sm" c="dimmed">
-                            {Math.floor(duration / 60)}h {duration % 60}m
-                        </Text>
-                    </Group>
-                </Group>
-
-                <Group gap="xs">
                     {genre.slice(0, 3).map((g, index) => (
-                        <Badge key={index} variant="light" size="sm">
-                            {g}
-                        </Badge>
+                        <Badge key={index} variant="light" size="sm">{g}</Badge>
                     ))}
                     {genre.length > 3 && (
-                        <Badge variant="light" size="sm" color="gray">
-                            +{genre.length - 3}
-                        </Badge>
+                        <Badge variant="light" size="sm" color="gray">+{genre.length - 3}</Badge>
                     )}
                 </Group>
 
@@ -89,9 +76,7 @@ export function MovieCard({
                     {description}
                 </Text>
 
-                <Rating value={rating / 2} fractions={2} readOnly size="sm"/>
-
-                <Group grow>
+                <Group grow mt="sm">
                     <Button variant="outline" onClick={onDetailsClick}>
                         Details
                     </Button>
