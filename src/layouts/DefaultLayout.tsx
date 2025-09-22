@@ -1,59 +1,110 @@
-import {Autocomplete, Box, Button, Group, Text, Modal} from '@mantine/core';
+import {
+    AppShell,
+    Autocomplete,
+    Box,
+    Burger,
+    Button,
+    Drawer,
+    Group,
+    Modal,
+    Stack,
+    Text,
+    UnstyledButton
+} from "@mantine/core";
+import {useDisclosure} from "@mantine/hooks";
 import {IconSearch} from "@tabler/icons-react";
-import * as React from "react";
-import classes from './DefaultLayout.module.css';
-import { AuthenticationForm } from '../components/AuthenticationForm.tsx';
-import { useDisclosure } from '@mantine/hooks';
-import { useState, useEffect } from 'react';
-import { UseAuth } from '../contexts/AuthProvider.tsx';
+import React, {useEffect, useState} from "react";
+import {Link, useLocation, useSearchParams} from "wouter";
+import {AuthenticationForm} from "../components/AuthenticationForm.tsx";
+import {UseAuth} from "../contexts/AuthProvider.tsx";
+import classes from "./DefaultLayout.module.css";
 
 const DefaultLayout = ({children}: React.PropsWithChildren) => {
-    const [opened, { open, close }] = useDisclosure(false);
-    const [type, setType] = useState<'login' | 'register'>('login')
-    const [logOutButtonVisible, setLogOutButtonVisible] = useState(false);
+    const [drawerOpened, {toggle: toggleDrawer, close: closeDrawer}] = useDisclosure(false);
+    const [modalOpened, {open: openModal, close: closeModal}] = useDisclosure(false);
+    const [authType, setAuthType] = useState<"login" | "register">("login");
+    const [, setLocation] = useLocation();
+    const [searchParams] = useSearchParams();
+    const urlQuery = searchParams.get("q") || "";
+    const [searchQuery, setSearchQuery] = useState(urlQuery);
 
-    const { user, LogOut } = UseAuth()
+    const {user, LogOut} = UseAuth();
+    const isAuthenticated = user !== null;
 
-    // Log out button becomes visible when user has logged in
-    useEffect (() => {
-        if (user !== null) {
-            setLogOutButtonVisible(true)
-        }
-        else {
-            setLogOutButtonVisible(false)
-        }
-    }, [user])
+    useEffect(() => {
+        setSearchQuery(urlQuery);
+    }, [urlQuery]);
+
+    const handleAuthClick = (type: "login" | "register") => {
+        setAuthType(type);
+        openModal();
+        closeDrawer();
+    };
+
+    const handleSearchSubmit = (event: React.FormEvent) => {
+        event.preventDefault();
+        const trimmedQuery = searchQuery.trim();
+        setLocation(`/search?q=${encodeURIComponent(trimmedQuery)}`);
+        closeDrawer();
+    };
+
+    const authControls = (
+        <>
+            {isAuthenticated ? (
+                <Group>
+                    <Text fw={700} size="sm">{user?.username}</Text>
+                    <Button variant="default" onClick={() => LogOut()}>Log Out</Button>
+                </Group>
+            ) : (
+                <Group>
+                    <Button variant="default" onClick={() => handleAuthClick("login")}>Log in</Button>
+                    <Button onClick={() => handleAuthClick("register")}>Sign up</Button>
+                </Group>
+            )}
+        </>
+    );
+
+    const searchForm = (
+        <form onSubmit={handleSearchSubmit}>
+            <Group>
+                <Autocomplete
+                    className={classes.search}
+                    placeholder="Search for a movie"
+                    leftSection={<IconSearch size={16} stroke={1.5}/>}
+                    data={[]}
+                    value={searchQuery}
+                    onChange={setSearchQuery}
+                />
+                <Button type="submit" variant="gradient">Search</Button>
+            </Group>
+        </form>
+    );
 
     return (
         <>
-            <Box pb={120}>
-                <header className={classes.header}>
-                    <Group justify="space-between" h="100%">
-                        <Text size="lg" fw={700}>Movie App</Text>
-                        <Group h="100%" gap={10} visibleFrom="sm">
-                            <Autocomplete
-                                className={classes.search}
-                                placeholder="Search for a movie"
-                                leftSection={<IconSearch size={16} stroke={1.5} />}
-                                data={[]}
-                                visibleFrom="xs"
-                            />
-                            <Button variant="gradient">Search</Button>
-                        </Group>
-                        <Group visibleFrom="sm">
-                            { !logOutButtonVisible && <Button variant="default" onClick={() => { setType('login'); open();}}>Log in</Button>}
-                            { !logOutButtonVisible && <Button onClick={() => { setType('register'); open();}}>Sign up</Button>}
-                            { logOutButtonVisible && <Button variant='transparent'>
-                                <Text fw={700}>{user?.username}</Text> 
-                            </Button>}
-                            { logOutButtonVisible && <Button onClick={() => {LogOut()}}>Log out</Button>}
-                        </Group>
+            <AppShell header={{height: 60}} padding="md">
+                <AppShell.Header className={classes.appShellHeader}>
+                    <Group h="100%" px="md" justify="space-between">
+                        <Link href="/">
+                            <UnstyledButton>
+                                <Text size="lg" fw={700}>Movie App</Text>
+                            </UnstyledButton>
+                        </Link>
+                        <Group visibleFrom="sm">{searchForm}</Group>
+                        <Box visibleFrom="sm">{authControls}</Box>
+                        <Burger opened={drawerOpened} onClick={toggleDrawer} hiddenFrom="sm" size="sm"/>
                     </Group>
-                </header>
-                {children}
-            </Box>
-            <Modal opened={opened} onClose={close} title="Authentication">
-                <AuthenticationForm initType={type} shadow="lg" onClose={close} />
+                </AppShell.Header>
+                <AppShell.Main>{children}</AppShell.Main>
+            </AppShell>
+            <Drawer opened={drawerOpened} onClose={closeDrawer} title="Navigation" padding="md" hiddenFrom="sm">
+                <Stack>
+                    {searchForm}
+                    {authControls}
+                </Stack>
+            </Drawer>
+            <Modal opened={modalOpened} onClose={closeModal} title="Authentication">
+                <AuthenticationForm initType={authType} shadow="lg" onClose={closeModal}/>
             </Modal>
         </>
     );
