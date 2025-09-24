@@ -7,7 +7,7 @@ interface MovieCardProps {
     year: number;
     genre: string[];
     rating: number;
-    duration: number;
+    duration?: number;
     description: string;
     director?: string;
     onDetailsClick?: () => void;
@@ -51,10 +51,12 @@ export function MovieCard({
                         <IconCalendar size={14} color="var(--mantine-color-dimmed)"/>
                         <Text size="sm" c="dimmed">{year}</Text>
                     </Group>
-                    <Group gap={4} align="center">
-                        <IconClock size={14} color="var(--mantine-color-dimmed)"/>
-                        <Text size="sm" c="dimmed">{Math.floor(duration / 60)}h {duration % 60}m</Text>
-                    </Group>
+                    {typeof duration === "number" && (
+                        <Group gap={4} align="center">
+                            <IconClock size={14} color="var(--mantine-color-dimmed)"/>
+                            <Text size="sm" c="dimmed">{Math.floor(duration / 60)}h {duration % 60}m</Text>
+                        </Group>
+                    )}
                 </Group>
 
                 {director && (

@@ -17,121 +17,44 @@ import {
 import {IconAlertCircle, IconMovieOff} from "@tabler/icons-react";
 import {useCallback, useEffect, useMemo, useState} from "react";
 import {useLocation, useSearchParams} from "wouter";
+import {discoverMovies, getGenres, getPosterUrl, searchMovies, type TmdbGenre, type TmdbMovie,} from "../api/tmdb.ts";
 import {MovieCard} from "../components/MovieCard.tsx";
 
-// Interface for a single movie object, ensuring type safety.
-interface Movie {
-    title: string;
-    poster: string;
-    year: number;
-    genre: string[];
-    rating: number;
-    duration: number;
-    description: string;
-    director: string;
-}
+// Constants for UI
+const DEFAULT_MIN_YEAR = 1950;
+const DEFAULT_MAX_YEAR = new Date().getFullYear();
 
-// Static dataset for demonstration. In a real application, this would not exist.
-const allMovies: Movie[] = [
-    {
-        title: "The Shawshank Redemption",
-        poster: "https://m.media-amazon.com/images/M/MV5BNDE3ODcxYzMtY2YzZC00NmNlLWJiNDMtZDViZWM2MzIxZDYwXkEyXkFqcGdeQXVyNjAwNDUxODI@._V1_SX300.jpg",
-        year: 1994,
-        genre: ["Drama", "Crime"],
-        rating: 9.3,
-        duration: 142,
-        description: "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
-        director: "Frank Darabont"
-    },
-    {
-        title: "The Dark Knight",
-        poster: "https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_SX300.jpg",
-        year: 2008,
-        genre: ["Action", "Crime", "Drama"],
-        rating: 9.0,
-        duration: 152,
-        description: "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.",
-        director: "Christopher Nolan"
-    },
-    {
-        title: "Pulp Fiction",
-        poster: "https://m.media-amazon.com/images/M/MV5BNGNhMDIzZTUtNTBlZi00MTRlLWFjM2ItYzViMjE3YzI5MjljXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_SX300.jpg",
-        year: 1994,
-        genre: ["Crime", "Drama"],
-        rating: 8.9,
-        duration: 154,
-        description: "The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.",
-        director: "Quentin Tarantino"
-    },
-    {
-        title: "Inception",
-        poster: "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg",
-        year: 2010,
-        genre: ["Action", "Adventure", "Sci-Fi"],
-        rating: 8.8,
-        duration: 148,
-        description: "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.",
-        director: "Christopher Nolan"
-    }
-];
-
-// Constants derived from the dataset to populate filter controls.
-const ALL_GENRES = [...new Set(allMovies.flatMap(movie => movie.genre))].sort();
-const MIN_YEAR = Math.min(...allMovies.map(movie => movie.year));
-const MAX_YEAR = Math.max(...allMovies.map(movie => movie.year));
-
-/**
- * Simulates an API call to fetch and filter movies.
- * @returns A promise that resolves to an array of filtered movies.
- */
-const fetchMovies = async (
-    query: string,
-    genres: string[],
-    yearRange: [number, number],
-    ratingRange: [number, number]
-): Promise<Movie[]> => {
-    return new Promise(resolve => {
-        setTimeout(() => {
-            const lowercasedQuery = query.toLowerCase();
-            const filtered = allMovies.filter(movie => {
-                const queryMatch =
-                    query.trim() === "" ||
-                    movie.title.toLowerCase().includes(lowercasedQuery) ||
-                    movie.description.toLowerCase().includes(lowercasedQuery);
-                const genreMatch =
-                    genres.length === 0 ||
-                    genres.every(genre => movie.genre.includes(genre));
-                const yearMatch = movie.year >= yearRange[0] && movie.year <= yearRange[1];
-                const ratingMatch = movie.rating >= ratingRange[0] && movie.rating <= ratingRange[1];
-                return queryMatch && genreMatch && yearMatch && ratingMatch;
-            });
-            resolve(filtered);
-        }, 800);
-    });
-};
-
-const PAGE_SIZE = 8;
-const SORT_OPTIONS = [
-    {value: "rating-desc", label: "Rating (high to low)"},
-    {value: "rating-asc", label: "Rating (low to high)"},
-    {value: "year-desc", label: "Year (newest first)"},
-    {value: "year-asc", label: "Year (oldest first)"},
-    {value: "title-asc", label: "Title (A-Z)"},
-    {value: "title-desc", label: "Title (Z-A)"},
+const PAGE_SIZE = 20; // TMDB default
+type SortValue =
+    | "vote_average.desc"
+    | "vote_average.asc"
+    | "primary_release_date.desc"
+    | "primary_release_date.asc"
+    | "original_title.asc"
+    | "original_title.desc";
+const SORT_OPTIONS: {value: SortValue; label: string}[] = [
+    {value: "vote_average.desc", label: "Rating (high to low)"},
+    {value: "vote_average.asc", label: "Rating (low to high)"},
+    {value: "primary_release_date.desc", label: "Year (newest first)"},
+    {value: "primary_release_date.asc", label: "Year (oldest first)"},
+    {value: "original_title.asc", label: "Title (A-Z)"},
+    {value: "original_title.desc", label: "Title (Z-A)"},
 ];
 
 const SearchView = () => {
     const [, setLocation] = useLocation();
     const [searchParams] = useSearchParams();
     const urlQuery = searchParams.get("q") || "";
-    const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
-    const [yearRange, setYearRange] = useState<[number, number]>([MIN_YEAR, MAX_YEAR]);
-    const [ratingRange, setRatingRange] = useState<[number, number]>([0, 100]);
-    const [sortBy, setSortBy] = useState<string | null>(SORT_OPTIONS[0].value);
+    const [genres, setGenres] = useState<TmdbGenre[]>([]);
+    const [selectedGenreIds, setSelectedGenreIds] = useState<number[]>([]);
+    const [yearRange, setYearRange] = useState<[number, number]>([DEFAULT_MIN_YEAR, DEFAULT_MAX_YEAR]);
+    const [ratingRange, setRatingRange] = useState<[number, number]>([0, 100]); // 0-100 to show slider, converted to 0-10
+    const [sortBy, setSortBy] = useState<SortValue | null>(SORT_OPTIONS[0].value);
     const [activePage, setPage] = useState(1);
-    const [tempYearRange, setTempYearRange] = useState<[number, number]>(yearRange);
-    const [tempRatingRange, setTempRatingRange] = useState<[number, number]>(ratingRange);
-    const [allResults, setAllResults] = useState<Movie[]>([]);
+    const [tempYearRange, setTempYearRange] = useState<[number, number]>([DEFAULT_MIN_YEAR, DEFAULT_MAX_YEAR]);
+    const [tempRatingRange, setTempRatingRange] = useState<[number, number]>([0, 100]);
+    const [results, setResults] = useState<TmdbMovie[]>([]);
+    const [totalPages, setTotalPages] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -143,41 +66,71 @@ const SearchView = () => {
         setTempRatingRange(ratingRange);
     }, [ratingRange]);
 
+    // Load TMDB genres on mount
+    useEffect(() => {
+        (async () => {
+            try {
+                const g = await getGenres();
+                setGenres(g);
+            } catch (e) {
+                console.error(e);
+            }
+        })();
+    }, []);
+
     const performSearch = useCallback(async () => {
         setIsLoading(true);
         setError(null);
-        setPage(1);
         try {
-            const decimalRatingRange: [number, number] = [ratingRange[0] / 10, ratingRange[1] / 10];
-            const results = await fetchMovies(urlQuery, selectedGenres, yearRange, decimalRatingRange);
-            setAllResults(results);
+            const ratingGte = (ratingRange[0] / 10).toFixed(1);
+            const ratingLte = (ratingRange[1] / 10).toFixed(1);
+            const yearGte = `${yearRange[0]}-01-01`;
+            const yearLte = `${yearRange[1]}-12-31`;
+
+            if (urlQuery.trim()) {
+                const data = await searchMovies({query: urlQuery.trim(), page: activePage});
+                setResults(data.results);
+                setTotalPages(data.total_pages);
+            } else {
+                const data = await discoverMovies({
+                    page: activePage,
+                    with_genres: selectedGenreIds,
+                    "primary_release_date.gte": yearGte,
+                    "primary_release_date.lte": yearLte,
+                    "vote_average.gte": Number(ratingGte),
+                    "vote_average.lte": Number(ratingLte),
+                    sort_by: (sortBy ?? "vote_average.desc"),
+                });
+                setResults(data.results);
+                setTotalPages(data.total_pages);
+            }
         } catch (err) {
             setError("Failed to fetch movies. Please try again later.");
             console.error(err);
         } finally {
             setIsLoading(false);
         }
-    }, [urlQuery, selectedGenres, yearRange, ratingRange]);
+    }, [urlQuery, activePage, selectedGenreIds, yearRange, ratingRange, sortBy]);
 
     useEffect(() => {
         void performSearch();
     }, [performSearch]);
 
-    const sortedAndPaginatedResults = useMemo(() => {
-        const sorted = [...allResults].sort((a, b) => {
-            const [field, direction] = sortBy?.split("-") || ["rating", "desc"];
-            const dir = direction === "asc" ? 1 : -1;
-            if (field === "title") return a.title.localeCompare(b.title) * dir;
-            if (field === "year") return (a.year - b.year) * dir;
-            return (a.rating - b.rating) * dir;
-        });
-        const startIndex = (activePage - 1) * PAGE_SIZE;
-        return sorted.slice(startIndex, startIndex + PAGE_SIZE);
-    }, [allResults, sortBy, activePage]);
+    const mappedResults = useMemo(() => {
+        return results.map((m) => ({
+            id: m.id,
+            title: m.title,
+            poster: getPosterUrl(m.poster_path, "w342"),
+            year: m.release_date ? Number(m.release_date.slice(0, 4)) : 0,
+            genre: m.genre_ids?.map((gid) => genres.find((g) => g.id === gid)?.name || "Unknown") || [],
+            rating: m.vote_average,
+            description: m.overview,
+        }));
+    }, [results, genres]);
 
     const handleResetFilters = () => {
-        setSelectedGenres([]);
-        setYearRange([MIN_YEAR, MAX_YEAR]);
+        setSelectedGenreIds([]);
+        setYearRange([DEFAULT_MIN_YEAR, DEFAULT_MAX_YEAR]);
         setRatingRange([0, 100]);
         setSortBy(SORT_OPTIONS[0].value);
         setPage(1);
@@ -207,7 +160,7 @@ const SearchView = () => {
             >{error}</Alert>;
         }
 
-        if (allResults.length === 0) {
+        if (mappedResults.length === 0) {
             return (
                 <Center h={400}>
                     <Stack align="center">
@@ -222,28 +175,43 @@ const SearchView = () => {
         return (
             <Stack>
                 <Group justify="space-between">
-                    <Text fw={500}>Found {allResults.length} movies</Text>
+                    <Text fw={500}>Page {activePage} of {Math.max(totalPages, 1)}</Text>
                     <Select
                         w={200}
                         label="Sort by"
                         data={SORT_OPTIONS}
                         value={sortBy}
-                        onChange={setSortBy}
+                        onChange={(v) => {
+                            setSortBy(v as SortValue | null);
+                            setPage(1);
+                        }}
                         allowDeselect={false}
                     />
                 </Group>
                 <Grid>
-                    {sortedAndPaginatedResults.map((movie) => (
-                        <Grid.Col key={movie.title} span={{base: 12, sm: 6, md: 4, lg: 3}}>
-                            <MovieCard {...movie} onDetailsClick={() => console.log(`Details for ${movie.title}`)}/>
+                    {mappedResults.map((movie) => (
+                        <Grid.Col key={movie.id} span={{base: 12, sm: 6, md: 4, lg: 3}}>
+                            <MovieCard
+                                title={movie.title}
+                                poster={movie.poster}
+                                year={movie.year}
+                                genre={movie.genre}
+                                rating={movie.rating}
+                                description={movie.description}
+                                onDetailsClick={() => console.log(`Details for ${movie.title}`)}
+                            />
                         </Grid.Col>
                     ))}
                 </Grid>
                 <Center mt="xl">
                     <Pagination
-                        total={Math.ceil(allResults.length / PAGE_SIZE)}
+                        total={Math.min(totalPages, 500)}
                         value={activePage}
-                        onChange={setPage}
+                        onChange={(p) => {
+                            setPage(p);
+                            // Keep filters but update URL query for search text stability
+                            if (urlQuery) setLocation(`/search?q=${encodeURIComponent(urlQuery)}`);
+                        }}
                     />
                 </Center>
             </Stack>
@@ -263,17 +231,28 @@ const SearchView = () => {
                             <Button variant="subtle" size="xs" onClick={handleResetFilters}>Reset</Button>
                         </Group>
                         <MultiSelect
-                            label="Genre" placeholder="Select genres" data={ALL_GENRES} value={selectedGenres}
-                            onChange={setSelectedGenres} searchable clearable
+                            label="Genre"
+                            placeholder="Select genres"
+                            data={genres.map((g) => ({value: String(g.id), label: g.name}))}
+                            value={selectedGenreIds.map(String)}
+                            onChange={(vals) => {
+                                setSelectedGenreIds(vals.map((v) => Number(v)));
+                                setPage(1);
+                            }}
+                            searchable
+                            clearable
                         />
                         <Box>
                             <Text size="sm" fw={500}>Year</Text>
                             <RangeSlider
                                 value={tempYearRange}
                                 onChange={setTempYearRange}
-                                onChangeEnd={setYearRange}
-                                min={MIN_YEAR}
-                                max={MAX_YEAR}
+                                onChangeEnd={(v) => {
+                                    setYearRange(v);
+                                    setPage(1);
+                                }}
+                                min={DEFAULT_MIN_YEAR}
+                                max={DEFAULT_MAX_YEAR}
                                 step={1}
                                 labelAlwaysOn
                             />
@@ -283,7 +262,10 @@ const SearchView = () => {
                             <RangeSlider
                                 value={tempRatingRange}
                                 onChange={setTempRatingRange}
-                                onChangeEnd={setRatingRange}
+                                onChangeEnd={(v) => {
+                                    setRatingRange(v);
+                                    setPage(1);
+                                }}
                                 min={0}
                                 max={100}
                                 step={1}
