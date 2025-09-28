@@ -30,10 +30,9 @@ export function MovieCard({
         <Card shadow="sm" padding="lg" radius="md" withBorder>
             <Card.Section>
                 <Image
-                    src={poster}
+                    src={poster || "https://placehold.co/342x500?text=No+Image"}
                     height={400}
                     alt={`${title} poster`}
-                    fallbackSrc="https://via.placeholder.com/350x400?text=No+Image"
                 />
             </Card.Section>
 
@@ -79,7 +78,10 @@ export function MovieCard({
                 </Text>
 
                 <Group grow mt="sm">
-                    <Button variant="outline" onClick={onDetailsClick}>
+                    <Button variant="outline" onClick={() => {
+                        console.log(`Navigating to /movie/${title}`); // Log the navigation URL
+                        onDetailsClick && onDetailsClick();
+                    }}>
                         Details
                     </Button>
                 </Group>

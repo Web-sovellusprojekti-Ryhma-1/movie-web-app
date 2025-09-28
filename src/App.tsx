@@ -4,6 +4,7 @@ import {Route, Switch} from "wouter";
 import DefaultLayout from "./layouts/DefaultLayout.tsx";
 import DashboardView from "./views/DashboardView.tsx";
 import SearchView from "./views/SearchView.tsx";
+import MovieDetailsView from "./views/MovieDetailsView.tsx";
 
 function App() {
     return (
@@ -12,6 +13,7 @@ function App() {
                 <Switch>
                     <Route path="/"><DashboardView/></Route>
                     <Route path="/search"><SearchView/></Route>
+                    <Route path="/movie/:id"><MovieDetailsView/></Route>
                     <Route><h1>404 Not Found</h1></Route>
                 </Switch>
             </DefaultLayout>

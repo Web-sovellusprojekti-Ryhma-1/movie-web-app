@@ -1,6 +1,7 @@
 import axios from "axios";
-
-const TMDB_BASE_URL = "https://api.themoviedb.org/3";
+import type { ExtendedTmdbMovie } from "../helpers/movieHelpers";
+// korjasin tiedostoa ja linkityksen takaisin backendiin
+const BASE_URL = "http://localhost:3001/api/tmdb";
 
 export interface TmdbGenre {
     id: number;
@@ -24,23 +25,6 @@ export interface TmdbPagedResponse<T> {
     total_results: number;
 }
 
-const bearer = import.meta.env.VITE_TMDB_BEARER as string | undefined;
-const tmdb = axios.create({
-    baseURL: TMDB_BASE_URL,
-    headers: bearer
-        ? {
-            "Content-Type": "application/json;charset=utf-8",
-            Authorization: `Bearer ${bearer}`,
-        }
-        : {
-            "Content-Type": "application/json;charset=utf-8",
-        },
-    params: {
-        api_key: import.meta.env.VITE_TMDB_API_KEY,
-        language: "en-US",
-    },
-});
-
 export type SearchMoviesParams = {
     query: string;
     page?: number;
@@ -50,7 +34,7 @@ export type SearchMoviesParams = {
 
 export async function searchMovies(params: SearchMoviesParams) {
     const {query, page = 1, include_adult = false, year} = params;
-    const response = await tmdb.get<TmdbPagedResponse<TmdbMovie>>("/search/movie", {
+    const response = await axios.get<TmdbPagedResponse<TmdbMovie>>(`${BASE_URL}/search`, {
         params: {
             query,
             page,
@@ -80,7 +64,7 @@ export type DiscoverMoviesParams = {
 };
 
 export async function discoverMovies(params: DiscoverMoviesParams = {}) {
-    const response = await tmdb.get<TmdbPagedResponse<TmdbMovie>>("/discover/movie", {
+    const response = await axios.get<TmdbPagedResponse<TmdbMovie>>(`${BASE_URL}/discover/movie`, {
         params: {
             ...params,
             with_genres: params.with_genres?.join(","),
@@ -90,10 +74,36 @@ export async function discoverMovies(params: DiscoverMoviesParams = {}) {
 }
 
 export async function getGenres() {
-    const response = await tmdb.get<{genres: TmdbGenre[]}>("/genre/movie/list");
-    return response.data.genres;
+    try {
+        const response = await axios.get<{ genres: TmdbGenre[] }>(`${BASE_URL}/genres`);
+        console.log("Fetched genres from backend:", response.data.genres); // Debugging
+        return response.data.genres;
+    } catch (error) {
+        console.error("Error fetching genres from backend:", error);
+        throw error;
+    }
 }
 
 export function getPosterUrl(path: string | null, size: "w185" | "w342" | "w500" | "original" = "w342") {
-    return path ? `https://image.tmdb.org/t/p/${size}${path}` : "https://via.placeholder.com/350x400?text=No+Image";
+    return path ? `https://image.tmdb.org/t/p/${size}${path}` : "https://placehold.co/342x500?text=No+Image";
 }
+
+export const getMovieDetails = async (id: string): Promise<ExtendedTmdbMovie> => {
+    try {
+        console.log("Fetching movie details for ID:", id); // Log the ID being fetched
+        const response = await axios.get<ExtendedTmdbMovie>(`${BASE_URL}/movie/${id}`);
+        console.log("Raw backend response:", response.data); // Log the raw response from the backend
+
+        // Ensure genres are included in the response
+        const movieDetails = {
+            ...response.data,
+            genres: response.data.genres || [],
+        };
+
+        console.log("Processed movie details:", movieDetails); // Debugging
+        return movieDetails;
+    } catch (error) {
+        console.error("Error fetching movie details:", error);
+        throw error;
+    }
+};
