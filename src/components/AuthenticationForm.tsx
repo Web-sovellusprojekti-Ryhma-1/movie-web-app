@@ -3,7 +3,7 @@ import type { PaperProps } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { upperFirst, useDisclosure, useToggle } from '@mantine/hooks';
 import { useEffect } from 'react';
-import { UseAuth } from '../contexts/AuthProvider';
+import { UseAuth } from '../context/AuthProvider';
 
 interface AuthenticationProps extends PaperProps {
   initType: 'login' | 'register'

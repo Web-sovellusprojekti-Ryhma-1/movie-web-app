@@ -1,9 +1,10 @@
 import React from "react";
-import type { Movie } from "./Movies";
 import { Container, Grid, Box, Text, Image, Flex } from "@mantine/core";
 
-interface FavoritesProps {
-  favorites: Movie[];
+
+
+interface ReviewProps {
+  reviews: Movie[];
 }
 
 const Favorites: React.FC<FavoritesProps> = ({ favorites }) => {

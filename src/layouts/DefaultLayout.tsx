@@ -16,7 +16,7 @@ import {IconSearch} from "@tabler/icons-react";
 import React, {useEffect, useState} from "react";
 import {Link, useLocation, useSearchParams} from "wouter";
 import {AuthenticationForm} from "../components/AuthenticationForm.tsx";
-import {UseAuth} from "../contexts/AuthProvider.tsx";
+import {UseAuth} from "../context/AuthProvider.tsx";
 import classes from "./DefaultLayout.module.css";
 
 const DefaultLayout = ({children}: React.PropsWithChildren) => {
