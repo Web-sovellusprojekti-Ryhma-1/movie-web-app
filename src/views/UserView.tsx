@@ -1,9 +1,11 @@
-import {Box, Text, Group} from "@mantine/core";
+import {Box, Text, Group, Space} from "@mantine/core";
 import "@mantine/core/styles.css";
 import { useState, useEffect } from "react";
 import { UserByIdRequest } from "../api/User";
 import Favorites from "../components/Favorites";
+import Reviews from "../components/Reviews";
 import type { Movie } from "../components/Movies";
+import type { Review } from "../components/Reviews";
 
 const Movies: Movie[] = [
     {
@@ -27,6 +29,33 @@ const Movies: Movie[] = [
         image: "https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_SX300.jpg"
     },
     
+]
+
+const MovieReviews: Review[] = [
+    {
+        id: 1,
+        title: "The Lego Movie",
+        image: "https://m.media-amazon.com/images/M/MV5BNDE3ODcxYzMtY2YzZC00NmNlLWJiNDMtZDViZWM2MzIxZDYwXkEyXkFqcGdeQXVyNjAwNDUxODI@._V1_SX300.jpg",
+        body: "Awesome movie!",
+        rating: 5,
+        reviewed_at: "28/9/2025"
+    },
+    {
+        id: 1,
+        title: "The Dark Knight",
+        image: "https://m.media-amazon.com/images/M/MV5BNDE3ODcxYzMtY2YzZC00NmNlLWJiNDMtZDViZWM2MzIxZDYwXkEyXkFqcGdeQXVyNjAwNDUxODI@._V1_SX300.jpg",
+        body: "Good movie!",
+        rating: 4,
+        reviewed_at: "28/9/2025"
+    },
+    {
+        id: 1,
+        title: "The Shawshank Redemption",
+        image: "https://m.media-amazon.com/images/M/MV5BNDE3ODcxYzMtY2YzZC00NmNlLWJiNDMtZDViZWM2MzIxZDYwXkEyXkFqcGdeQXVyNjAwNDUxODI@._V1_SX300.jpg",
+        body: "Very bad movie!",
+        rating: 1,
+        reviewed_at: "28/9/2025"
+    },
 ]
 
 interface UserType {
@@ -56,6 +85,8 @@ const UserView = ( { id }: { id: String }) => {
                 <Text ml="80" c="dimmed">{user?.email || "name@email.com"}</Text>
             </Group>
             <Favorites favorites={Movies}/>
+            <Space h="lg"/>
+            <Reviews reviews={MovieReviews}/>
         </Box>
         
 
