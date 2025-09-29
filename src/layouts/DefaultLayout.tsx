@@ -16,7 +16,7 @@ import {IconSearch} from "@tabler/icons-react";
 import React, {useEffect, useState} from "react";
 import {Link, useLocation, useSearchParams} from "wouter";
 import {AuthenticationForm} from "../components/AuthenticationForm.tsx";
-import {UseAuth} from "../contexts/AuthProvider.tsx";
+import {UseAuth} from "../context/AuthProvider.tsx";
 import classes from "./DefaultLayout.module.css";
 
 const DefaultLayout = ({children}: React.PropsWithChildren) => {
@@ -48,11 +48,15 @@ const DefaultLayout = ({children}: React.PropsWithChildren) => {
         closeDrawer();
     };
 
+    const NavigateToCurrentUser = () => {
+        setLocation(`/user/${user?.id}`);
+    }
+
     const authControls = (
         <>
             {isAuthenticated ? (
                 <Group>
-                    <Text fw={700} size="sm">{user?.username}</Text>
+                    <Button variant="transparent" fw={700} size="sm" onClick={() => NavigateToCurrentUser()}>{user?.username}</Button>
                     <Button variant="default" onClick={() => LogOut()}>Log Out</Button>
                 </Group>
             ) : (
