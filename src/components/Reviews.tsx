@@ -16,12 +16,12 @@ const Reviews: React.FC<ReviewProps> = ({ reviews }) => {
   if (reviews.length === 0) return null;
 
   return (
-    <Paper withBorder >
-      <Text ml="md" mb={10}>Reviews</Text>
-        <Grid ml="md" justify="flex-start" align="center">
+    <Paper withBorder shadow="sm">
+      
+        <Grid justify="flex-start" align="center" p="md">
                 {reviews.map((rev) => (
                     <Grid.Col key={rev.id} span={{base: 2, sm: 2, md: 1, lg: 2}}>
-                        <Card mb="md" withBorder radius="md" p="md" h={220} style={{ display: 'flex', flexDirection: 'column' }}>
+                        <Card shadow="xs" mb="md" withBorder radius="md" p="md" h={220} style={{ display: 'flex', flexDirection: 'column' }}>
                               <Card.Section>
                                   <Text ml="xs" mt="xs" fz="lg" fw={500}>
                                     {rev.title}
@@ -35,7 +35,7 @@ const Reviews: React.FC<ReviewProps> = ({ reviews }) => {
                               </div>
 
                               <Text mt="auto"  c="dimmed">
-                                <Rating value={rev.rating}/>
+                                <Rating value={rev.rating} readOnly />
                               </Text>
                               <Text fz="xs" mt="auto"  c="dimmed">
                                 {rev.reviewed_at}

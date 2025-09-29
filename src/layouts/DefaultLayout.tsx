@@ -48,11 +48,15 @@ const DefaultLayout = ({children}: React.PropsWithChildren) => {
         closeDrawer();
     };
 
+    const NavigateToCurrentUser = () => {
+        setLocation(`/user/${user?.id}`);
+    }
+
     const authControls = (
         <>
             {isAuthenticated ? (
                 <Group>
-                    <Text fw={700} size="sm">{user?.username}</Text>
+                    <Button variant="transparent" fw={700} size="sm" onClick={() => NavigateToCurrentUser()}>{user?.username}</Button>
                     <Button variant="default" onClick={() => LogOut()}>Log Out</Button>
                 </Group>
             ) : (

@@ -6,6 +6,8 @@ import Favorites from "../components/Favorites";
 import Reviews from "../components/Reviews";
 import type { Movie } from "../components/Movies";
 import type { Review } from "../components/Reviews";
+import type { GroupType } from "../components/Groups";
+import Groups from "../components/Groups";
 
 const Movies: Movie[] = [
     {
@@ -52,9 +54,20 @@ const MovieReviews: Review[] = [
         id: 1,
         title: "The Shawshank Redemption",
         image: "https://m.media-amazon.com/images/M/MV5BNDE3ODcxYzMtY2YzZC00NmNlLWJiNDMtZDViZWM2MzIxZDYwXkEyXkFqcGdeQXVyNjAwNDUxODI@._V1_SX300.jpg",
-        body: "Very bad movie!",
+        body: "I didn't like this movie.",
         rating: 1,
         reviewed_at: "28/9/2025"
+    },
+]
+
+const UserGroups: GroupType[] = [
+    {
+        id: 1,
+        name: "mygroup1"
+    },
+    {
+        id: 2,
+        name: "Superman Fan Club"
     },
 ]
 
@@ -80,13 +93,19 @@ const UserView = ( { id }: { id: String }) => {
 
     return (
         <Box>
-            <Group p={20} ml="80">
+            <Group p={20} ml="50" mb="sm">
                 <Text size="xl" fw={700} ta="center" >{user?.username || "Username"}</Text>
                 <Text ml="80" c="dimmed">{user?.email || "name@email.com"}</Text>
             </Group>
+            <Text>Reviews</Text>
+            <Reviews reviews={MovieReviews}/>
+            <Space h="lg"/>
+            <Text>Favorites</Text>
             <Favorites favorites={Movies}/>
             <Space h="lg"/>
-            <Reviews reviews={MovieReviews}/>
+            <Text>Groups</Text>
+            <Groups groups={UserGroups}/>
+            
         </Box>
         
 
