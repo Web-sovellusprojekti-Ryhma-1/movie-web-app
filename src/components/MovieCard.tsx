@@ -7,7 +7,7 @@ interface MovieCardProps {
     year: number;
     genre: string[];
     rating: number;
-    duration: number;
+    duration?: number;
     description: string;
     director?: string;
     onDetailsClick?: () => void;
@@ -30,10 +30,9 @@ export function MovieCard({
         <Card shadow="sm" padding="lg" radius="md" withBorder>
             <Card.Section>
                 <Image
-                    src={poster}
+                    src={poster || "https://placehold.co/342x500?text=No+Image"}
                     height={400}
                     alt={`${title} poster`}
-                    fallbackSrc="https://via.placeholder.com/350x400?text=No+Image"
                 />
             </Card.Section>
 
@@ -51,10 +50,12 @@ export function MovieCard({
                         <IconCalendar size={14} color="var(--mantine-color-dimmed)"/>
                         <Text size="sm" c="dimmed">{year}</Text>
                     </Group>
-                    <Group gap={4} align="center">
-                        <IconClock size={14} color="var(--mantine-color-dimmed)"/>
-                        <Text size="sm" c="dimmed">{Math.floor(duration / 60)}h {duration % 60}m</Text>
-                    </Group>
+                    {typeof duration === "number" && (
+                        <Group gap={4} align="center">
+                            <IconClock size={14} color="var(--mantine-color-dimmed)"/>
+                            <Text size="sm" c="dimmed">{Math.floor(duration / 60)}h {duration % 60}m</Text>
+                        </Group>
+                    )}
                 </Group>
 
                 {director && (
@@ -77,7 +78,10 @@ export function MovieCard({
                 </Text>
 
                 <Group grow mt="sm">
-                    <Button variant="outline" onClick={onDetailsClick}>
+                    <Button variant="outline" onClick={() => {
+                        console.log(`Navigating to /movie/${title}`); // Log the navigation URL
+                        onDetailsClick && onDetailsClick();
+                    }}>
                         Details
                     </Button>
                 </Group>
