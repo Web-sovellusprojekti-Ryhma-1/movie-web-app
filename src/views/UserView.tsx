@@ -1,4 +1,5 @@
-import {Box, Text, Group, Space} from "@mantine/core";
+import {Box, Text, Group, Space, Button, Modal} from "@mantine/core";
+import { useDisclosure } from '@mantine/hooks';
 import "@mantine/core/styles.css";
 import { useState, useEffect } from "react";
 import { UserByIdRequest } from "../api/User";
@@ -8,6 +9,7 @@ import type { Movie } from "../components/Movies";
 import type { Review } from "../components/Reviews";
 import type { GroupType } from "../components/Groups";
 import Groups from "../components/Groups";
+import { ConfirmationWindow } from "../components/ConfirmationWindow";
 
 const Movies: Movie[] = [
     {
@@ -43,7 +45,7 @@ const MovieReviews: Review[] = [
         reviewed_at: "28/9/2025"
     },
     {
-        id: 1,
+        id: 2,
         title: "The Dark Knight",
         image: "https://m.media-amazon.com/images/M/MV5BNDE3ODcxYzMtY2YzZC00NmNlLWJiNDMtZDViZWM2MzIxZDYwXkEyXkFqcGdeQXVyNjAwNDUxODI@._V1_SX300.jpg",
         body: "Good movie!",
@@ -51,7 +53,7 @@ const MovieReviews: Review[] = [
         reviewed_at: "28/9/2025"
     },
     {
-        id: 1,
+        id: 3,
         title: "The Shawshank Redemption",
         image: "https://m.media-amazon.com/images/M/MV5BNDE3ODcxYzMtY2YzZC00NmNlLWJiNDMtZDViZWM2MzIxZDYwXkEyXkFqcGdeQXVyNjAwNDUxODI@._V1_SX300.jpg",
         body: "I didn't like this movie.",
@@ -78,6 +80,7 @@ interface UserType {
 
 const UserView = ( { id }: { id: String }) => {
     const [user, setUser] = useState<UserType | null>(null)
+    const [opened, { open, close }] = useDisclosure(false);
 
     useEffect(() => {
     async function fetchUser() {
@@ -91,11 +94,20 @@ const UserView = ( { id }: { id: String }) => {
     fetchUser();
   }, []);
 
+  const handleResult = (confirmed: boolean) => {
+    close()
+    if (confirmed) {
+      console.log("Delete Account");
+    }
+  }
+
     return (
+        <>
         <Box>
             <Group p={20} ml="50" mb="sm">
                 <Text size="xl" fw={700} ta="center" >{user?.username || "Username"}</Text>
                 <Text ml="80" c="dimmed">{user?.email || "name@email.com"}</Text>
+                <Button ml={820} onClick={() => open()}>Delete my account</Button>
             </Group>
             <Text>Reviews</Text>
             <Reviews reviews={MovieReviews}/>
@@ -105,8 +117,11 @@ const UserView = ( { id }: { id: String }) => {
             <Space h="lg"/>
             <Text>Groups</Text>
             <Groups groups={UserGroups}/>
-            
         </Box>
+        <Modal opened={opened} onClose={close} size="xs" title="Delete user account">
+            <ConfirmationWindow result={handleResult}/>
+        </Modal>
+        </>
         
 
     )
