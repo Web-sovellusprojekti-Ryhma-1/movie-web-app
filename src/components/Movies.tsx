@@ -3,6 +3,7 @@ import React from "react";
 export interface Movie {
     id: number;
     title: string;
+    image: string;
 }
 interface MoviesProps {
   movies: Movie[];

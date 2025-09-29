@@ -1,10 +1,12 @@
 import { axiosPrivate } from './Axios.ts'
-import type { SignUpType, LoginType } from '../contexts/AuthProvider'
+import type { SignUpType, LoginType } from '../context/AuthProvider.tsx'
 
-export const SignUpService = async (userData: SignUpType) => {
-        return await axiosPrivate.post("/signup", userData)
+export const SignUpRequest = async (userData: SignUpType) => {
+        const response = await axiosPrivate.post("api/user/signup", userData)
+        return response.data
 }
 
-export const LoginService = async (userData: LoginType) => {
-        return await axiosPrivate.post("/signin", userData)
+export const LoginRequest = async (userData: LoginType) => {
+        const response = await axiosPrivate.post("api/user/signin", userData)
+        return response.data
 }
