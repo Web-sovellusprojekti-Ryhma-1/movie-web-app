@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Image, Title, Text, Badge, Group, Button, Modal, Textarea, NumberInput } from "@mantine/core";
+import { Box, Image, Title, Text, Badge, Group, Button, Modal, Textarea, Rating, TextInput } from "@mantine/core";
 import { DateInput } from "@mantine/dates"; 
 import { Select } from "@mantine/core"; 
 import type { MovieDetails as MovieDetailsType } from "../helpers/movieHelpers";
@@ -11,21 +11,30 @@ interface MovieDetailsProps {
 }
 
 const MovieDetails: React.FC<MovieDetailsProps> = ({ movie, onClose, addToFavorites }) => {
-  const [reviews, setReviews] = useState(["Sample review 1", "Sample review 2", "Sample review 3"]) // arvostelut
+  const [reviews, setReviews] = useState([
+    { title: "Sample review 1", text: "This is a great movie!", rating: 4 },
+    { title: "Sample review 2", text: "Not bad, could be better.", rating: 3 },
+    { title: "Sample review 3", text: "I didn't like it that much.", rating: 2 }
+  ]) // arvostelut
   const [isModalOpen, setIsModalOpen] = useState(false) // modaalin näkyvyys jotta voidaan triggeröidä napista
   const [newReview, setNewReview] = useState("") // uusi arvostelu
+  const [newReviewTitle, setNewReviewTitle] = useState("") // arvostelun otsikko
   const [newRating, setNewRating] = useState<number>(0) // arvostelun arvosanan parametri
   const [selectedDate, setSelectedDate] = useState<string | null>(null) // kalenterin päivä valinta
   const [selectedTheatreArea, setSelectedTheatreArea] = useState<string | null>(null) // finnkino api myöhemmin tähän mukaan
   // riviewille funktio parametrit
   const addReview = () => {
-    if (newReview.trim()) {
-      setReviews([...reviews, `${newReview} (Rating: ${newRating}/5)`])
-      setNewReview("")
+    if (newReview.trim() && newReviewTitle.trim()) {
+      setReviews([
+        ...reviews,
+        { title: newReviewTitle, text: newReview, rating: newRating }
+      ]) // uuen arvostelun lisäämisen kentät:
+      setNewReview("") 
+      setNewReviewTitle("")
       setNewRating(0)
       setIsModalOpen(false)
     }
-  };
+  }
 
   return (
     <Box>
@@ -102,27 +111,34 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie, onClose, addToFavori
         <Title order={3} style={{ marginTop: "2rem" }}>Movie App User Reviews</Title> 
         <Box style={{ display: "flex", overflowX: "auto", gap: "1rem", padding: "1rem", whiteSpace: "nowrap" }}> {/* vieritys palkki jotta voi scrollailla arvosteluja */}
           {reviews.map((review, index) => (
-            <Box key={index} style={{ display: "inline-block", minWidth: "300px", border: "1px solid #ccc", padding: "1rem", wordWrap: "break-word", whiteSpace: "normal" }}>{review}</Box>
+            <Box key={index} style={{ display: "inline-block", minWidth: "300px", border: "1px solid #ccc", padding: "1rem", wordWrap: "break-word", whiteSpace: "normal" }}>
+              <div>
+                <strong>{review.title}</strong> 
+                <Rating value={review.rating} readOnly /> {/* read onlyksi tähdet niin niitä ei voi muuttaa itse sivulla */}
+              </div>
+              {review.text}
+            </Box>
           ))}
         </Box>
         <Button style={{ marginTop: "1rem" }} onClick={() => setIsModalOpen(true)}>Add Review</Button> {/* modaalin triggeröivä nappi */}
 
         <Modal opened={isModalOpen} onClose={() => setIsModalOpen(false)} title="Add a Review"> {/* Modaali eli popup ikkuna arvostelun luontiin */}
+          <TextInput
+            label="Title"
+            value={newReviewTitle}
+            onChange={(event) => setNewReviewTitle(event.currentTarget.value)}
+            size="sm" 
+          />
           <Textarea
-            placeholder="Write your review here..."
+            label="Review"
             value={newReview}
             onChange={(event) => setNewReview(event.currentTarget.value)}
-            label="Review"
-            required
+            autosize
+            minRows={4} 
           />
-          <NumberInput
-            placeholder="Rating"  // arvosanan valinta kenttä
+          <Rating
             value={newRating}
-            onChange={(value) => setNewRating(typeof value === "number" ? value : 0)} 
-            label="Rating (out of 5)" 
-            min={0}
-            max={5}
-            required
+            onChange={setNewRating}
           />
           <Group mt="md"> 
             <Button variant="default" onClick={() => setIsModalOpen(false)}>Cancel</Button>
@@ -130,7 +146,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ movie, onClose, addToFavori
           </Group>
         </Modal>
       </Box>
-      {/* Showtimes Section */}
+      
       <Title order={3} style={{ marginTop: "2rem" }}>Showtimes</Title>
       <Box style={{ marginTop: "1rem" }}>
         <DateInput
