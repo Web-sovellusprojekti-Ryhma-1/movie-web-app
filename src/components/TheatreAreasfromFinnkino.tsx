@@ -1,75 +1,77 @@
 import React, { useEffect, useState } from 'react';
 import { fetchTheatreAreas, fetchMoviesFromTheatre } from '../api/finnkinoapi';
+import { Grid } from '@mantine/core';
+import { MovieCard } from './MovieCard';
 
 interface TheatreArea {
-  ID: string
-  Name: string
+  ID: string;
+  Name: string;
 }
 
 interface Movie {
-  Title: string
-  Theatre: string
-  dttmShowStart: string
-  LengthInMinutes: string
-  ProductionYear: string
+  Title: string;
+  Theatre: string;
+  dttmShowStart: string;
+  LengthInMinutes: string;
+  ProductionYear: string;
   Images?: {
-    EventMediumImagePortrait?: string
-  }
+    EventMediumImagePortrait?: string;
+  };
 }
+
 interface TheatreAreasResponse {
   TheatreAreas: {
-    TheatreArea: TheatreArea[]
-  }
+    TheatreArea: TheatreArea[];
+  };
 }
 
 interface MoviesResponse {
   Schedule: {
     Shows: {
-      Show: Movie[]
-    }
-  }
+      Show: Movie[];
+    };
+  };
 }
 
 const TheatreAreas: React.FC = () => {
-    const [areas, setAreas] = useState<TheatreArea[]>([])
-    const [selectedArea, setSelectedArea] = useState<string>('')
-    const [movies, setMovies] = useState<Movie[]>([])
-    const [loading, setLoading] = useState<boolean>(false)
-    const [error, setError] = useState<string>('')
+  const [areas, setAreas] = useState<TheatreArea[]>([]);
+  const [selectedArea, setSelectedArea] = useState<string>('');
+  const [movies, setMovies] = useState<Movie[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
 
-  // haetaan teatterit
+  // Fetch theatre areas
   useEffect(() => {
     fetchTheatreAreas<TheatreAreasResponse>()
       .then((data) => {
-        const theatreAreas = data.TheatreAreas.TheatreArea
-        setAreas(theatreAreas)
+        const theatreAreas = data.TheatreAreas.TheatreArea;
+        setAreas(theatreAreas);
       })
       .catch((error) => {
-      console.error('Error loading areas: ', error)
-      setError('Failed to load theatre areas')
-      })
-  }, [])
+        console.error('Error loading areas: ', error);
+        setError('Failed to load theatre areas');
+      });
+  }, []);
 
-  // haetaan elokuvat kun on valittu teatteri
+  // Fetch movies when a theatre area is selected
   useEffect(() => {
     if (selectedArea) {
-      setLoading(true)
+      setLoading(true);
       fetchMoviesFromTheatre<MoviesResponse>(selectedArea)
         .then((data) => {
-          const shows = data.Schedule.Shows.Show || []
-          setMovies(shows)
-          setLoading(false)
+          const shows = data.Schedule.Shows.Show || [];
+          setMovies(shows);
+          setLoading(false);
         })
         .catch((error) => {
-          console.error('Error loading movies:', error)
-          setError('Failed to load movies')
-          setLoading(false)
-        })
+          console.error('Error loading movies:', error);
+          setError('Failed to load movies');
+          setLoading(false);
+        });
+    } else {
+      setMovies([]);
     }
-    else{
-        setMovies([])
-    }
-  }, [selectedArea])
+  }, [selectedArea]);
 
   return (
     <div>
@@ -77,8 +79,8 @@ const TheatreAreas: React.FC = () => {
       <select
         id="theatreSelect"
         value={selectedArea}
-        onChange={(e) => setSelectedArea(e.target.value)}>
-            
+        onChange={(e) => setSelectedArea(e.target.value)}
+      >
         <option value="">-- Select theatre area --</option>
         {areas.map((area) => (
           <option key={area.ID} value={area.ID}>
@@ -87,38 +89,33 @@ const TheatreAreas: React.FC = () => {
         ))}
       </select>
 
-      {loading && <p>Loading movies..</p>}
+      {loading && <p>Loading movies...</p>}
       {error && <p style={{ color: 'red' }}>{error}</p>}
-      
+
       <div id="movieList">
         {selectedArea && movies.length === 0 && (
           <p>No movies found for this theatre.</p>
         )}
 
-        {movies.map((movie, index) => (
-          <div key={index} className="movie" style={{ marginBottom: "1rem" }}>
-            {movie.Images?.EventMediumImagePortrait && (
-              <img
-                src={movie.Images.EventMediumImagePortrait}
-                alt={movie.Title}
-                style={{ width: "120px", marginRight: "1rem" }}
+        <Grid>
+          {movies.map((movie, index) => (
+            <Grid.Col key={index} span={{ base: 12, sm: 6, md: 4, lg: 3 }}>
+              <MovieCard
+                title={movie.Title}
+                poster={movie.Images?.EventMediumImagePortrait || 'https://placehold.co/342x500?text=No+Image'}
+                year={parseInt(movie.ProductionYear) || 0}
+                genre={[]} // Finnkino API does not provide genres
+                rating={0} // Finnkino API does not provide ratings
+                duration={parseInt(movie.LengthInMinutes) || undefined}
+                description={`Showtime: ${movie.dttmShowStart}`}
+                onDetailsClick={() => console.log(`Details clicked for ${movie.Title}`)}
               />
-            )}
-
-            <div className="movie-info">
-              <h2>{movie.Title}</h2>
-              <p>
-                Year: {movie.ProductionYear || "N/A"}, Length:{" "}
-                {movie.LengthInMinutes || "N/A"} min
-              </p>
-              <p>Theatre: {movie.Theatre}</p>
-              <p>Showtime: {movie.dttmShowStart}</p>
-            </div>
-          </div>
-        ))}
+            </Grid.Col>
+          ))}
+        </Grid>
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default TheatreAreas;
