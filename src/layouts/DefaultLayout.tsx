@@ -89,11 +89,20 @@ const DefaultLayout = ({children}: React.PropsWithChildren) => {
             <AppShell header={{height: 60}} padding="md">
                 <AppShell.Header className={classes.appShellHeader}>
                     <Group h="100%" px="md" justify="space-between">
-                        <Link href="/">
-                            <UnstyledButton>
-                                <Text size="lg" fw={700}>Movie App</Text>
-                            </UnstyledButton>
-                        </Link>
+                        <Group gap="lg" align="center">
+                            <Link href="/">
+                                <UnstyledButton>
+                                    <Text size="lg" fw={700}>Movie App</Text>
+                                </UnstyledButton>
+                            </Link>
+                            <Group gap="md" visibleFrom="md">
+                                <Link href="/groups">
+                                    <UnstyledButton>
+                                        <Text size="sm" fw={600}>Groups</Text>
+                                    </UnstyledButton>
+                                </Link>
+                            </Group>
+                        </Group>
                         <Group visibleFrom="sm">{searchForm}</Group>
                         <Box visibleFrom="sm">{authControls}</Box>
                         <Burger opened={drawerOpened} onClick={toggleDrawer} hiddenFrom="sm" size="sm"/>
@@ -103,6 +112,9 @@ const DefaultLayout = ({children}: React.PropsWithChildren) => {
             </AppShell>
             <Drawer opened={drawerOpened} onClose={closeDrawer} title="Navigation" padding="md" hiddenFrom="sm">
                 <Stack>
+                    <Link href="/groups">
+                        <Button variant="subtle" onClick={closeDrawer}>Groups</Button>
+                    </Link>
                     {searchForm}
                     {authControls}
                 </Stack>

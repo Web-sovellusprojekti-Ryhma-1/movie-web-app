@@ -6,6 +6,8 @@ import DashboardView from "./views/DashboardView.tsx";
 import SearchView from "./views/SearchView.tsx";
 import MovieDetailsView from "./views/MovieDetailsView.tsx";
 import UserView from "./views/UserView.tsx";
+import GroupsListView from "./views/GroupsListView.tsx";
+import GroupDetailsView from "./views/GroupDetailsView.tsx";
 
 function App() {
     return (
@@ -16,6 +18,8 @@ function App() {
                         <Route path="/" component={DashboardView}/>
                         <Route path="/search" component={SearchView}/>
                         <Route path="/movie/:id" component={MovieDetailsView}/>
+                        <Route path="/groups" component={GroupsListView}/>
+                        <Route path="/groups/:id" component={GroupDetailsView}/>
                         <Route path="/user/:id">{params => <UserView id={params.id} />}</Route>
                         <Route><h1>404 Not Found</h1></Route>
                     </Switch>
