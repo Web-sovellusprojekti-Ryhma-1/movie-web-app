@@ -14,6 +14,8 @@ const Groups: React.FC<GroupProps> = ({ groups }) => {
   if (groups.length === 0) return null;
 
   return (
+    <Box>
+        <Text>Groups</Text>
     <Paper withBorder h={210} shadow="sm">
       
         <Grid p="md" align="center">
@@ -28,7 +30,7 @@ const Groups: React.FC<GroupProps> = ({ groups }) => {
                 <Text>Show more</Text>
         </Grid>
     </Paper>
-    
+    </Box>
   )
 }
 

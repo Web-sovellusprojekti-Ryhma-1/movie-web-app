@@ -1,8 +1,11 @@
-import {Box, Text, Group, Space, Button, Modal} from "@mantine/core";
+import {Box, Text, Group, Space, Button, Modal, List} from "@mantine/core";
 import { useDisclosure } from '@mantine/hooks';
 import "@mantine/core/styles.css";
 import { useState, useEffect } from "react";
 import { UserByIdRequest } from "../api/User";
+import { ReviewByUserId } from "../api/Review";
+
+
 import Favorites from "../components/Favorites";
 import Reviews from "../components/Reviews";
 import type { Movie } from "../components/Movies";
@@ -10,7 +13,7 @@ import type { Review } from "../components/Reviews";
 import type { GroupType } from "../components/Groups";
 import Groups from "../components/Groups";
 import { ConfirmationWindow } from "../components/ConfirmationWindow";
-
+/*
 const Movies: Movie[] = [
     {
         id: 1,
@@ -72,8 +75,11 @@ const UserGroups: GroupType[] = [
         name: "Superman Fan Club"
     },
 ]
+*/
+
 
 interface UserType {
+    id: number
     username: string
     email: string
 }
@@ -82,16 +88,27 @@ const UserView = ( { id }: { id: String }) => {
     const [user, setUser] = useState<UserType | null>(null)
     const [opened, { open, close }] = useDisclosure(false);
 
+    const [MovieReviews, setReviews] = useState([]);
+    const [UserGroups, setGroups] = useState([]);
+    const [UserFavorites, setFavorites] = useState([]);
+
     useEffect(() => {
-    async function fetchUser() {
+    async function fetchData() {
       try {
+        // Fetch user
         const response = await UserByIdRequest(id)
-        setUser(response.data)
+        const userData = response.data
+        setUser(userData)
+
+        // Fetch user reviews, favorites and groups
+        const review = await ReviewByUserId(userData.id)
+        console.log(review)
+        setReviews(review.data.rows)
       } catch (err) {
         console.error("Failed to fetch user", err)
       }
     }
-    fetchUser();
+    fetchData();
   }, []);
 
   const handleResult = (confirmed: boolean) => {
@@ -109,13 +126,8 @@ const UserView = ( { id }: { id: String }) => {
                 <Text ml="80" c="dimmed">{user?.email || "name@email.com"}</Text>
                 <Button ml={820} onClick={() => open()}>Delete my account</Button>
             </Group>
-            <Text>Reviews</Text>
             <Reviews reviews={MovieReviews}/>
-            <Space h="lg"/>
-            <Text>Favorites</Text>
-            <Favorites favorites={Movies}/>
-            <Space h="lg"/>
-            <Text>Groups</Text>
+            <Favorites favorites={UserFavorites}/>
             <Groups groups={UserGroups}/>
         </Box>
         <Modal opened={opened} onClose={close} size="xs" title="Delete user account">

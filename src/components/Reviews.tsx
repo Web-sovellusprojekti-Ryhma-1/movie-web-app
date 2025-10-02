@@ -16,6 +16,8 @@ const Reviews: React.FC<ReviewProps> = ({ reviews }) => {
   if (reviews.length === 0) return null;
 
   return (
+    <Box>
+      <Text>Reviews</Text>
     <Paper withBorder shadow="sm">
       
         <Grid justify="flex-start" align="center" p="md">
@@ -47,7 +49,7 @@ const Reviews: React.FC<ReviewProps> = ({ reviews }) => {
                 <Text>Show more</Text>
         </Grid>
     </Paper>
-    
+    </Box>
   )
 }
 
