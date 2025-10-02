@@ -107,3 +107,13 @@ export const getMovieDetails = async (id: string): Promise<ExtendedTmdbMovie> =>
         throw error;
     }
 };
+
+export const fetchPopularMovies = async () => {
+    try {
+        const response = await axios.get<TmdbPagedResponse<TmdbMovie>>(`${BASE_URL}/popular`)
+        return response.data
+    } catch (error) {
+        console.error("Error fetching popular movies:", error)
+        throw error
+    }
+}

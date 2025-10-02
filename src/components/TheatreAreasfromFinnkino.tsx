@@ -2,45 +2,46 @@ import React, { useEffect, useState } from 'react';
 import { fetchTheatreAreas, fetchMoviesFromTheatre } from '../api/finnkinoapi';
 import { Grid } from '@mantine/core';
 import { MovieCard } from './MovieCard';
+import './TheatreAreasfromFinnkino.css'; 
 
 interface TheatreArea {
-  ID: string;
-  Name: string;
+  ID: string
+  Name: string
 }
 
 interface Movie {
-  Title: string;
-  Theatre: string;
-  dttmShowStart: string;
-  LengthInMinutes: string;
-  ProductionYear: string;
+  Title: string
+  Theatre: string
+  dttmShowStart: string
+  LengthInMinutes: string
+  ProductionYear: string
   Images?: {
-    EventMediumImagePortrait?: string;
-  };
+    EventMediumImagePortrait?: string
+  }
 }
 
 interface TheatreAreasResponse {
   TheatreAreas: {
-    TheatreArea: TheatreArea[];
-  };
+    TheatreArea: TheatreArea[]
+  }
 }
 
 interface MoviesResponse {
   Schedule: {
     Shows: {
-      Show: Movie[];
-    };
-  };
+      Show: Movie[]
+    }
+  }
 }
 
 const TheatreAreas: React.FC = () => {
-  const [areas, setAreas] = useState<TheatreArea[]>([]);
-  const [selectedArea, setSelectedArea] = useState<string>('');
-  const [movies, setMovies] = useState<Movie[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
+  const [areas, setAreas] = useState<TheatreArea[]>([])
+  const [selectedArea, setSelectedArea] = useState<string>('')
+  const [movies, setMovies] = useState<Movie[]>([])
+  const [loading, setLoading] = useState<boolean>(false)
+  const [error, setError] = useState<string>('')
 
-  // Fetch theatre areas
+  // haetaan teatterialueet
   useEffect(() => {
     fetchTheatreAreas<TheatreAreasResponse>()
       .then((data) => {
@@ -48,36 +49,39 @@ const TheatreAreas: React.FC = () => {
         setAreas(theatreAreas);
       })
       .catch((error) => {
-        console.error('Error loading areas: ', error);
-        setError('Failed to load theatre areas');
-      });
-  }, []);
+        console.error('Error loading areas: ', error)
+        setError('Failed to load theatre areas')
+      })
+  }, [])
 
-  // Fetch movies when a theatre area is selected
+  // listataan elokuvat kun valitaan teatteri
   useEffect(() => {
     if (selectedArea) {
-      setLoading(true);
+      setLoading(true)
       fetchMoviesFromTheatre<MoviesResponse>(selectedArea)
         .then((data) => {
-          const shows = data.Schedule.Shows.Show || [];
-          setMovies(shows);
-          setLoading(false);
+          const shows = data.Schedule.Shows.Show || []
+          setMovies(shows)
+          setLoading(false)
         })
         .catch((error) => {
-          console.error('Error loading movies:', error);
-          setError('Failed to load movies');
-          setLoading(false);
-        });
+          console.error('Error loading movies:', error)
+          setError('Failed to load movies')
+          setLoading(false)
+        })
     } else {
-      setMovies([]);
+      setMovies([])
     }
-  }, [selectedArea]);
+  }, [selectedArea])
 
   return (
-    <div>
-      <label htmlFor="theatreSelect">Select theatre area:</label>
+    <div className="theatre-areas-container">
+      <label htmlFor="theatreSelect" className="theatre-label">
+        Select theatre area:
+      </label>
       <select
         id="theatreSelect"
+        className="theatre-select"
         value={selectedArea}
         onChange={(e) => setSelectedArea(e.target.value)}
       >
@@ -102,13 +106,18 @@ const TheatreAreas: React.FC = () => {
             <Grid.Col key={index} span={{ base: 12, sm: 6, md: 4, lg: 3 }}>
               <MovieCard
                 title={movie.Title}
-                poster={movie.Images?.EventMediumImagePortrait || 'https://placehold.co/342x500?text=No+Image'}
+                poster={
+                  movie.Images?.EventMediumImagePortrait ||
+                  'https://placehold.co/342x500?text=No+Image'
+                }
                 year={parseInt(movie.ProductionYear) || 0}
                 genre={[]} // Finnkino API does not provide genres
                 rating={0} // Finnkino API does not provide ratings
                 duration={parseInt(movie.LengthInMinutes) || undefined}
                 description={`Showtime: ${movie.dttmShowStart}`}
-                onDetailsClick={() => console.log(`Details clicked for ${movie.Title}`)}
+                onDetailsClick={() =>
+                  console.log(`Details clicked for ${movie.Title}`)
+                }
               />
             </Grid.Col>
           ))}

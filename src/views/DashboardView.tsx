@@ -1,54 +1,63 @@
-import {Box, Grid, Title} from "@mantine/core";
+import React, {useEffect, useState} from "react";
+import {Box, Title} from "@mantine/core";
 import "@mantine/core/styles.css";
-import {MovieCard} from "../components/MovieCard.tsx";
-import TheatreAreas from "../components/TheatreAreasfromFinnkino.tsx";
-
-const movies = [
-    {
-        title: "The Shawshank Redemption",
-        poster: "https://m.media-amazon.com/images/M/MV5BNDE3ODcxYzMtY2YzZC00NmNlLWJiNDMtZDViZWM2MzIxZDYwXkEyXkFqcGdeQXVyNjAwNDUxODI@._V1_SX300.jpg",
-        year: 1994,
-        genre: ["Drama", "Crime"],
-        rating: 9.3,
-        duration: 142,
-        description: "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
-        director: "Frank Darabont"
-    },
-    {
-        title: "The Dark Knight",
-        poster: "https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_SX300.jpg",
-        year: 2008,
-        genre: ["Action", "Crime", "Drama"],
-        rating: 9.0,
-        duration: 152,
-        description: "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.",
-        director: "Christopher Nolan"
-    },
-];
+import {MovieCard} from "../components/MovieCard";
+import TheatreAreas from "../components/TheatreAreasfromFinnkino";
+import {fetchPopularMovies} from "../api/tmdb";
+import type {TmdbMovie} from "../api/tmdb";
+import {useLocation} from "wouter";
 
 const DashboardView = () => {
+    const [popularMovies, setPopularMovies] = useState<TmdbMovie[]>([]);
+    const [, navigate] = useLocation();
+
+    useEffect(() => {
+        const loadPopularMovies = async () => {
+            try {
+                const data = await fetchPopularMovies()
+                setPopularMovies(data.results)
+            } catch (error) {
+                console.error("Failed to fetch popular movies:", error)
+            }
+        }
+
+        loadPopularMovies()
+    }, [])
+
     return (
         <Box p={20}>
             <Title order={1} mb="xl">Movies</Title>
 
-            <TheatreAreas/>
-            <Grid>
-                {movies.map((movie, index) => (
-                    <Grid.Col key={index} span={{base: 12, sm: 6, md: 4, lg: 3}}>
+            <Title order={2} mb="lg">Popular Now</Title>
+            <Box
+                style={{
+                    display: "flex",
+                    overflowX: "auto",
+                    gap: "1rem",
+                    padding: "1rem",
+                    whiteSpace: "nowrap",
+                }}
+            >
+                {popularMovies.map((movie, index) => (
+                    <Box key={index} style={{flex: "0 0 auto", width: "200px"}}>
                         <MovieCard
                             title={movie.title}
-                            poster={movie.poster}
-                            year={movie.year}
-                            genre={movie.genre}
-                            rating={movie.rating}
-                            duration={movie.duration}
-                            description={movie.description}
-                            director={movie.director}
-                            onDetailsClick={() => console.log(`Details clicked for ${movie.title}`)}
+                            poster={
+                                movie.poster_path
+                                    ? `https://image.tmdb.org/t/p/w342${movie.poster_path}`
+                                    : "https://placehold.co/342x500?text=No+Image"
+                            }
+                            year={movie.release_date ? Number(movie.release_date.slice(0, 4)) : 0}
+                            genre={[]}
+                            rating={movie.vote_average}
+                            description={movie.overview}
+                            onDetailsClick={() => navigate(`/movie/${movie.id}`)}
                         />
-                    </Grid.Col>
+                    </Box>
                 ))}
-            </Grid>
+            </Box>
+
+            <TheatreAreas/>
         </Box>
     )
 }
