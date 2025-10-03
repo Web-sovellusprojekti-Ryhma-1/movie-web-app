@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import {Box, Title} from "@mantine/core";
 import "@mantine/core/styles.css";
 import {MovieCard} from "../components/MovieCard";

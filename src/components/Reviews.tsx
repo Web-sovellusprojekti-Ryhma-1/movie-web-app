@@ -1,15 +1,17 @@
 import React from "react";
-import { Group, Grid, Box, Text, Image, Flex, Card, Rating, Paper } from "@mantine/core";
-import type { Movie } from "./Movies";
+import { Grid, Box, Text, Card, Rating, Paper } from "@mantine/core";
 
-export interface Review extends Movie {
+export interface ReviewType {
+  user_id: number
+  title: string
   body: string
   rating: number
+  tmdb_id: number
   reviewed_at: string
 }
 
 interface ReviewProps {
-  reviews: Review[];
+  reviews: ReviewType[];
 }
 
 const Reviews: React.FC<ReviewProps> = ({ reviews }) => {
@@ -22,7 +24,7 @@ const Reviews: React.FC<ReviewProps> = ({ reviews }) => {
       
         <Grid justify="flex-start" align="center" p="md">
                 {reviews.map((rev) => (
-                    <Grid.Col key={rev.id} span={{base: 2, sm: 2, md: 1, lg: 2}}>
+                    <Grid.Col key={rev.tmdb_id} span={{base: 2, sm: 2, md: 1, lg: 2}}>
                         <Card shadow="xs" mb="md" withBorder radius="md" p="md" h={220} style={{ display: 'flex', flexDirection: 'column' }}>
                               <Card.Section>
                                   <Text ml="xs" mt="xs" fz="lg" fw={500}>

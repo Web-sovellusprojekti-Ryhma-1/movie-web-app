@@ -1,7 +1,7 @@
 import React from "react";
 
 export interface Movie {
-    id: number;
+    tmdb_id: number;
     title: string;
     image: string;
 }
@@ -16,8 +16,8 @@ const Movies: React.FC<MoviesProps> = ({ movies, onSelect }) => {
       <tbody>
         {movies.map((movie) => (
           <tr
-            key={movie.id}
-            onClick={() => onSelect(movie.id)}
+            key={movie.tmdb_id}
+            onClick={() => onSelect(movie.tmdb_id)}
             style={{ cursor: "pointer" }}
           >
             <td>{movie.title}</td>

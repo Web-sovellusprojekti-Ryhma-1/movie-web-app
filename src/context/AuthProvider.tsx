@@ -10,8 +10,12 @@ export interface LoginType {
     user: { email: string; password: string }
 }
 
-interface AuthContextType {
-  user: { id: number; username: string; email: string; password: string; token: string } | null
+export interface UserType {
+    user: { id: number; username: string; email: string; password: string; token: string } | null
+}
+
+
+interface AuthContextType extends UserType {
   Login: (userData: LoginType) => Promise<void>
   SignUp: (userData: SignUpType) => Promise<void>
   LogOut: () => Promise<void>
@@ -37,7 +41,7 @@ export function AuthProvider({children}: {children: ReactNode}) {
     }
 
     const Login = async (userData: LoginType) => {
-        const response = await LoginRequest(userData)
+        const response = await LoginRequest(userData) as { data: UserType }
         setUser(response.data)
         sessionStorage.setItem('user', JSON.stringify(response.data))
     }

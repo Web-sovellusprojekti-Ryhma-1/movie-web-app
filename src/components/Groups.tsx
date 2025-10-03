@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, Title, Grid, Box, Text, Image, Flex, Paper } from "@mantine/core";
+import { Card, Title, Grid, Box, Text, Paper } from "@mantine/core";
 
 export interface GroupType {
     id: number

@@ -1,7 +1,7 @@
 import {Anchor, Button, Group, Paper, PasswordInput, Stack, Text, TextInput} from '@mantine/core';
 import type { PaperProps } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { upperFirst, useDisclosure, useToggle } from '@mantine/hooks';
+import { upperFirst, useToggle } from '@mantine/hooks';
 import { useEffect } from 'react';
 import { UseAuth } from '../context/AuthProvider';
 
@@ -42,7 +42,7 @@ export function AuthenticationForm({ initType, onClose, ...props}: Authenticatio
           password: form.values.password
         }
       })
-      .then(Response => {
+      .then(() => {
         console.log("Sign up succesful")
         form.setFieldValue('name', '')
         form.setFieldValue('email', '')
@@ -60,7 +60,7 @@ export function AuthenticationForm({ initType, onClose, ...props}: Authenticatio
           password: form.values.password
         }
       })
-      .then(Response => {
+      .then(() => {
         console.log("Sign in succesful")
         onClose()
       })

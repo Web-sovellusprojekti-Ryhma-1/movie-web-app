@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import type { Movie } from "./Movies";
-import { Button, Grid, Box, Text, Image, Flex, Paper } from "@mantine/core";
+import { Grid, Box, Text, Image, Paper } from "@mantine/core";
 import { getMovieDetails } from "../api/tmdb";
 
 export interface FavoriteType {
