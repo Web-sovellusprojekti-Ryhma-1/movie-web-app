@@ -4,8 +4,9 @@ import "@mantine/core/styles.css";
 import { useState, useEffect } from "react";
 import { UserByIdRequest } from "../api/User";
 import { ReviewByUserId } from "../api/Review";
+import { GetUserFavorites } from "../api/Favorite";
 
-
+import type { FavoriteType } from "../components/Favorites";
 import Favorites from "../components/Favorites";
 import Reviews from "../components/Reviews";
 import type { Movie } from "../components/Movies";
@@ -87,23 +88,31 @@ interface UserType {
 const UserView = ( { id }: { id: String }) => {
     const [user, setUser] = useState<UserType | null>(null)
     const [opened, { open, close }] = useDisclosure(false);
+    const [Loading, setLoading] = useState(false);
 
     const [MovieReviews, setReviews] = useState([]);
     const [UserGroups, setGroups] = useState([]);
-    const [UserFavorites, setFavorites] = useState([]);
+    const [UserFavorites, setFavorites] = useState<FavoriteType[]>([]);
 
     useEffect(() => {
     async function fetchData() {
       try {
+        setLoading(true);
         // Fetch user
         const response = await UserByIdRequest(id)
         const userData = response.data
         setUser(userData)
 
         // Fetch user reviews, favorites and groups
-        const review = await ReviewByUserId(userData.id)
-        console.log(review)
-        setReviews(review.data.rows)
+        const [reviews, favorites] = await Promise.all([
+            ReviewByUserId(userData.id),
+            GetUserFavorites(userData.id)
+        ])
+        setReviews(reviews.data.rows)
+        setFavorites(favorites.data.rows)
+
+        setLoading(false);
+
       } catch (err) {
         console.error("Failed to fetch user", err)
       }
@@ -117,6 +126,8 @@ const UserView = ( { id }: { id: String }) => {
       console.log("Delete Account");
     }
   }
+
+  if(Loading) return null;
 
     return (
         <>
