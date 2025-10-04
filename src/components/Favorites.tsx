@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Grid, Box, Text, Image, Paper } from "@mantine/core";
+import { Flex, Box, Text, Image, Paper, ScrollArea } from "@mantine/core";
 import { getMovieDetails } from "../api/tmdb";
 
 export interface FavoriteType {
@@ -61,28 +61,29 @@ const Favorites: React.FC<FavoritesProps> = ({ favorites }) => {
   return (
     <Box>
       <Text>Favorites</Text>
-    <Paper withBorder h={210} shadow="sm">
-        <Grid p="md" align="center">
-                {FavoritesList.map((fav) => (
-                    <Grid.Col key={fav.tmdb_id} span={{base: 2, sm: 2, md: 1, lg: 1}}>
+          <Paper withBorder shadow="sm" w={1200} h="auto">
+            <ScrollArea
+                      type="hover"
+                      offsetScrollbars
+                      scrollbarSize={8}
+                      style={{ width: '100%' }}
+                      >
+
+                      <Flex p="md" gap="md" mr="md">
+                          {FavoritesList.map((fav) => (
+                              <Image onClick={() => { 
+                                movieClick(fav.tmdb_id)}} 
+                                w={116}
+                                h="auto"
+                                src={`https://image.tmdb.org/t/p/w500${fav.image}`}
+                              />
+                          ))}
+                      </Flex>
                       
-                        <Image onClick={() => { 
-                          movieClick(fav.tmdb_id)
-                        }} 
-                        src={`https://image.tmdb.org/t/p/w500${fav.image}`}
-                        />
-                      
-                    </Grid.Col>
-                ))}
-                
-                <Text>Show more</Text>
-        </Grid>
-    </Paper>
+            </ScrollArea>
+          </Paper>
     </Box>
   )
 }
 
-export default Favorites;
-/*
-
-*/
+export default Favorites

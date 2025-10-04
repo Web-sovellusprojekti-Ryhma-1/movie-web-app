@@ -1,4 +1,4 @@
-import {Box, Text, Group, Button, Modal} from "@mantine/core";
+import {Center, Box, Text, Group, Button, Modal, Space} from "@mantine/core";
 import { useDisclosure } from '@mantine/hooks';
 import "@mantine/core/styles.css";
 import { useState, useEffect } from "react";
@@ -80,15 +80,21 @@ const UserView = ( { id }: { id: string }) => {
     return (
         <>
         <Box>
-            <Group p={20} ml="50" mb="sm">
+            <Group p={20} ml="100" mb="sm">
                 <Text size="xl" fw={700} ta="center" >{user?.username || "Username"}</Text>
                 <Text ml="80" c="dimmed">{user?.email || "name@email.com"}</Text>
-                <Button ml={820} onClick={() => open()}>Delete my account</Button>
+                <Button ml={770} onClick={() => open()}>Delete my account</Button>
             </Group>
+
+            <Group ml={120}>
             <Reviews reviews={MovieReviews}/>
+            <Space h="md"/>
             <Favorites favorites={UserFavorites}/>
-            <Groups groups={UserGroups}/>
+            </Group>
+            
+            
         </Box>
+
         <Modal opened={opened} onClose={close} size="xs" title="Delete user account">
             <ConfirmationWindow result={handleResult}/>
         </Modal>
