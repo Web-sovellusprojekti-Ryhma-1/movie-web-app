@@ -117,3 +117,26 @@ export const fetchPopularMovies = async () => {
         throw error
     }
 }
+
+// titlen mukaan elokuvan haku jotta voidaan käyttää title -> id navigointia finnkinoapin kanssa
+export const searchMovieByTitle = async (title: string) => {
+  try {
+    const response = await axios.get<TmdbPagedResponse<TmdbMovie>>(`${BASE_URL}/search`, {
+      params: { query: title, page: 1, include_adult: false },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error searching for movie by title:", error);
+    throw error;
+  }
+};
+
+export const fetchMovieById = async (id: number) => {
+  try {
+    const response = await axios.get<TmdbMovie>(`${BASE_URL}/movie/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching movie by ID:", error);
+    throw error;
+  }
+};
