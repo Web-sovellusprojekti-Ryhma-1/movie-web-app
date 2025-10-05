@@ -37,9 +37,9 @@ export function AuthProvider({children}: {children: ReactNode}) {
     }
 
     const Login = async (userData: LoginType) => {
-        const response = await LoginRequest(userData)
-        setUser(response.data)
-        sessionStorage.setItem('user', JSON.stringify(response.data))
+        const response = await LoginRequest(userData) as { data: { id: number; username: string; email: string; password: string; token: string } };
+        setUser(response.data);
+        sessionStorage.setItem('user', JSON.stringify(response.data));
     }
 
     const LogOut = async () => {
@@ -54,3 +54,5 @@ export function AuthProvider({children}: {children: ReactNode}) {
         </AuthContext.Provider>
     )
 }
+
+export { AuthContext };

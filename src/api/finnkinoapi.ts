@@ -9,14 +9,14 @@ export const fetchTheatreAreas = async <T>() => {
 
 export const fetchMoviesFromTheatre = async <T>(areaId: string) => {
     const response = await axios.get<T>(`${BASE_URL}/movies`, {
-    params: { areaId },
-})
-return response.data
-}
+        params: { areaId },
+    });
+    return response.data;
+};
 
 export const fetchShowtimes = async <T>(areaId: string, date: string) => {
     const response = await axios.get<T>(`${BASE_URL}/showtimes`, {
-        params: { areaId, date }
-    })
-    return response.data
-}
+        params: { areaId, date },
+    });
+    return response.data;
+};

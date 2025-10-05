@@ -7,39 +7,34 @@ import { getMovieDetails } from "../api/tmdb";
 import type { MovieDetails as MovieDetailsType } from "../helpers/movieHelpers";
 
 const MovieDetailsView = () => {
-  const [match, params] = useRoute("/movie/:id")
-  console.log("MovieDetailsView: useRoute match:", match, "params:", params)
+  const [, params] = useRoute("/movie/:title");
+  const [movie, setMovie] = useState<MovieDetailsType | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const id = params?.id
-  console.log("MovieDetailsView: Extracted ID from URL:", id)
-
-  const [movie, setMovie] = useState<MovieDetailsType | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const title = params?.title;
 
   useEffect(() => {
     const fetchMovieDetails = async () => {
       try {
-        const data = await getMovieDetails(id!)
-        if (!data || data.success === false) {
-          console.error("API Error:", data) // debuggausta jotta nähdään saadaanko data backendistä
-          throw new Error(data.status_message || "Failed to fetch movie details.")
+        if (!title) {
+          throw new Error("Movie title is missing.");
         }
-        console.log("Raw API data:", data)
-        const transformedData = transformTmdbMovie(data)
-        console.log("Transformed movie data:", transformedData)
-        setMovie(transformedData)
-        console.log("Movie state set to:", transformedData)
+        const data = await getMovieDetails(title);
+        if (!data || data.success === false) {
+          throw new Error(data.status_message || "Failed to fetch movie details.");
+        }
+        const transformedData = transformTmdbMovie(data);
+        setMovie(transformedData);
       } catch (err) {
-        console.error("Error fetching movie details:", err)
-        setError(err instanceof Error ? err.message : "An unknown error occurred")
+        setError(err instanceof Error ? err.message : "An unknown error occurred");
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    fetchMovieDetails()
-  }, [id])
+    fetchMovieDetails();
+  }, [title]);
 
   if (isLoading) {
     return (
@@ -65,13 +60,7 @@ const MovieDetailsView = () => {
   }
 
   return (
-    <Container
-      size="lg"
-      p={20}
-      style={{
-        marginLeft: "8rem", // tässä stylellä voi muuttaa koko elokuvatiedon sijaintia sivulla
-      }}
-    >
+    <Container size="lg" p={20}>
       {movie && (
         <MovieDetails
           movie={movie}
