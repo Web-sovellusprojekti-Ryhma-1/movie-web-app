@@ -26,7 +26,7 @@ const UserView = () => {
     
     const { user, LogOut } = UseAuth()
 
-     const [, setLocation] = useLocation();
+    const [, setLocation] = useLocation();
 
     const [profileUser, setProfileUser] = useState<UserTypeFromIdRequest | null>(null)
     const [opened, { open, close }] = useDisclosure(false);

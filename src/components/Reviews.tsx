@@ -1,5 +1,6 @@
 import React from "react";
-import { Box, Text, Card, Rating, Paper, ScrollArea } from "@mantine/core";
+import { Box, Text, Card, Rating, Paper, ScrollArea, Anchor } from "@mantine/core";
+import { useLocation } from "wouter";
 
 export interface ReviewType {
   user_id: number
@@ -15,7 +16,13 @@ interface ReviewProps {
 }
 
 const Reviews: React.FC<ReviewProps> = ({ reviews }) => {
+  const [, setLocation] = useLocation();
+
   if (reviews.length === 0) return null;
+
+  const titleClick = (movieId: number | null) => {
+    setLocation(`/movie/${movieId}`)
+  };
 
   return (
     <Box>
@@ -45,9 +52,9 @@ const Reviews: React.FC<ReviewProps> = ({ reviews }) => {
                 style={{ width: 220, height: 220, flex: '0 0 auto' }}
               >
                 <Card.Section>
-                  <Text fz="lg" fw={500} mt="xs" ml="xs">
+                  <Anchor c="black" fz="lg" fw={600} mt="xs" ml="xs" onClick={() => { titleClick(rev.tmdb_id) }}>
                     {rev.title}
-                  </Text>
+                  </Anchor>
                 </Card.Section>
 
                 <div style={{ flex: 1 }}>

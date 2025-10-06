@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Flex, Box, Text, Image, Paper, ScrollArea } from "@mantine/core";
 import { getMovieDetails } from "../api/tmdb";
+import { useLocation } from "wouter";
 
 export interface FavoriteType {
   user_id: number
@@ -17,11 +18,15 @@ interface FavoritesListType {
 }
 
 const Favorites: React.FC<FavoritesProps> = ({ favorites }) => {
+  const [, setLocation] = useLocation();
+
   const [FavoritesList, setFavorites] = useState<FavoritesListType[]>([]);
   const [Loading, setLoading] = useState(false);
 
-  const movieClick = async (movieId: number | null) => {
+  
 
+  const movieClick = (movieId: number | null) => {
+    setLocation(`/movie/${movieId}`)
   }
 
   useEffect(() => {
@@ -40,7 +45,7 @@ const Favorites: React.FC<FavoritesProps> = ({ favorites }) => {
           let currentFavorite = favorites[i].tmdb_id
           let movieDetails = await getMovieDetails(currentFavorite.toString())
           console.log("Movie details: " + movieDetails)
-          movieList.push({tmdb_id: favorites[0].tmdb_id, image: movieDetails.poster_path})
+          movieList.push({tmdb_id: favorites[i].tmdb_id, image: movieDetails.poster_path})
         }
 
         setFavorites(movieList)
@@ -71,8 +76,9 @@ const Favorites: React.FC<FavoritesProps> = ({ favorites }) => {
 
                       <Flex p="md" gap="md" mr="md">
                           {FavoritesList.map((fav) => (
-                              <Image onClick={() => { 
-                                movieClick(fav.tmdb_id)}} 
+                              <Image
+                                key={fav.tmdb_id}
+                                onClick={() => { movieClick(fav.tmdb_id) }} 
                                 w={116}
                                 h="auto"
                                 src={`https://image.tmdb.org/t/p/w500${fav.image}`}
