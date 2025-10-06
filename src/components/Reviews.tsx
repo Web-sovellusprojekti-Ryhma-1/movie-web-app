@@ -1,5 +1,5 @@
 import React from "react";
-import { Grid, Box, Text, Card, Rating, Paper, ScrollArea, Center } from "@mantine/core";
+import { Box, Text, Card, Rating, Paper, ScrollArea } from "@mantine/core";
 
 export interface ReviewType {
   user_id: number

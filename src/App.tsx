@@ -1,5 +1,7 @@
 import {MantineProvider} from "@mantine/core";
 import "@mantine/core/styles.css";
+import '@mantine/notifications/styles.css';
+import { Notifications } from '@mantine/notifications';
 import {Route, Switch, Router} from "wouter";
 import DefaultLayout from "./layouts/DefaultLayout.tsx";
 import DashboardView from "./views/DashboardView.tsx";
@@ -12,6 +14,7 @@ import GroupDetailsView from "./views/GroupDetailsView.tsx";
 function App() {
     return (
         <MantineProvider>
+            <Notifications/>
             <Router>
                 <DefaultLayout>
                     <Switch>
@@ -20,7 +23,7 @@ function App() {
                         <Route path="/movie/:id" component={MovieDetailsView}/>
                         <Route path="/groups" component={GroupsListView}/>
                         <Route path="/groups/:id" component={GroupDetailsView}/>
-                        <Route path="/user/:id">{params => <UserView id={params.id} />}</Route>
+                        <Route path="/user/:id" component={UserView}/>
                         <Route><h1>404 Not Found</h1></Route>
                     </Switch>
                 </DefaultLayout>

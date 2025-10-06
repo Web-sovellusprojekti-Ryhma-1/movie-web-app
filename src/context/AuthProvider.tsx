@@ -1,19 +1,7 @@
 import { useState, useContext, createContext } from 'react'
 import type { ReactNode } from 'react';
 import { SignUpRequest, LoginRequest } from '../api/Auth.ts';
-
-export interface SignUpType {
-    user: { username: string; email: string; password: string }
-}
-
-export interface LoginType {
-    user: { email: string; password: string }
-}
-
-export interface UserType {
-    user: { id: number; username: string; email: string; password: string; token: string } | null
-}
-
+import type { UserType, SignUpType, LoginType } from '../types/user.ts';
 
 interface AuthContextType extends UserType {
   Login: (userData: LoginType) => Promise<void>

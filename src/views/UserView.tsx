@@ -1,45 +1,38 @@
-import {Center, Box, Text, Group, Button, Modal, Space} from "@mantine/core";
+import { Box, Text, Group, Button, Modal, Space} from "@mantine/core";
+import { useLocation, useParams } from "wouter";
 import { useDisclosure } from '@mantine/hooks';
 import "@mantine/core/styles.css";
 import { useState, useEffect } from "react";
-import { UserByIdRequest } from "../api/User";
+import { UserByIdRequest, DeleteUserAccount } from "../api/User";
 import { ReviewByUserId } from "../api/Review";
 import { GetUserFavorites } from "../api/Favorite";
-
 import type { FavoriteType } from "../components/Favorites";
 import type { ReviewType } from "../components/Reviews";
 import Favorites from "../components/Favorites";
 import Reviews from "../components/Reviews";
-import Groups from "../components/Groups";
 import { ConfirmationWindow } from "../components/ConfirmationWindow";
-
-/*
-const UserGroups: GroupType[] = [
-    {
-        id: 1,
-        name: "mygroup1"
-    },
-    {
-        id: 2,
-        name: "Superman Fan Club"
-    },
-]
-*/
+import { UseAuth } from "../context/AuthProvider";
+import { notifications } from "@mantine/notifications";
+import { IconCheck } from "@tabler/icons-react";
 
 
 interface UserTypeFromIdRequest {
-    id: number
     username: string
     email: string
 }
 
-const UserView = ( { id }: { id: string }) => {
-    const [user, setUser] = useState<UserTypeFromIdRequest | null>(null)
+const UserView = () => {
+    const { id } = useParams()
+    
+    const { user, LogOut } = UseAuth()
+
+     const [, setLocation] = useLocation();
+
+    const [profileUser, setProfileUser] = useState<UserTypeFromIdRequest | null>(null)
     const [opened, { open, close }] = useDisclosure(false);
     const [Loading, setLoading] = useState(false);
 
     const [MovieReviews, setReviews] = useState<ReviewType[]>([]);
-    const [UserGroups, setGroups] = useState([]);
     const [UserFavorites, setFavorites] = useState<FavoriteType[]>([]);
 
     useEffect(() => {
@@ -47,14 +40,15 @@ const UserView = ( { id }: { id: string }) => {
       try {
         setLoading(true);
         // Fetch user
-        const response = await UserByIdRequest(Number(id)) as {data: UserTypeFromIdRequest}
+        const userId = Number(id)
+        const response = await UserByIdRequest(userId) as {data: UserTypeFromIdRequest}
         const userData = response.data
-        setUser(userData)
+        setProfileUser(userData)
 
-        // Fetch user reviews, favorites and groups
+        // Fetch user reviews, favorites
         const [reviews, favorites] = await Promise.all([
-            ReviewByUserId(userData.id) as Promise<{ data: { rows: ReviewType[]} }>,
-            GetUserFavorites(userData.id) as Promise<{ data: { rows: FavoriteType[] } }>
+            ReviewByUserId(userId) as Promise<{ data: { rows: ReviewType[]} }>,
+            GetUserFavorites(userId) as Promise<{ data: { rows: FavoriteType[] } }>
         ])
         setReviews(reviews.data.rows)
         setFavorites(favorites.data.rows)
@@ -66,14 +60,32 @@ const UserView = ( { id }: { id: string }) => {
       }
     }
     fetchData();
-  }, []);
+  }, [id]);
 
   const handleResult = (confirmed: boolean) => {
     close()
     if (confirmed) {
-      console.log("Delete Account");
+      DeleteUserAccount()
+      notifications.show({
+          title: "Success",
+          message: "Account deleted successfully",
+          color: 'cyan',
+          icon: <IconCheck size={18} />,
+        })
+      LogOut()
+      setLocation("/")
     }
   }
+
+  const ShowUserDeletionButton = (
+    <>
+        {user?.id == id ? (
+            <Button ml={770} onClick={() => open()}>Delete my account</Button>
+        ) : (
+            null
+        )}
+    </>
+  )
 
   if(Loading) return null;
 
@@ -81,9 +93,9 @@ const UserView = ( { id }: { id: string }) => {
         <>
         <Box>
             <Group p={20} ml="100" mb="sm">
-                <Text size="xl" fw={700} ta="center" >{user?.username || "Username"}</Text>
-                <Text ml="80" c="dimmed">{user?.email || "name@email.com"}</Text>
-                <Button ml={770} onClick={() => open()}>Delete my account</Button>
+                <Text size="xl" fw={700} ta="center" >{profileUser?.username || "Username"}</Text>
+                <Text ml="80" c="dimmed">{profileUser?.email || "name@email.com"}</Text>
+                {ShowUserDeletionButton}
             </Group>
 
             <Group ml={120}>
@@ -91,8 +103,6 @@ const UserView = ( { id }: { id: string }) => {
             <Space h="md"/>
             <Favorites favorites={UserFavorites}/>
             </Group>
-            
-            
         </Box>
 
         <Modal opened={opened} onClose={close} size="xs" title="Delete user account">

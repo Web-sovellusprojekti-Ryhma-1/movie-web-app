@@ -4,6 +4,8 @@ import { useForm } from '@mantine/form';
 import { upperFirst, useToggle } from '@mantine/hooks';
 import { useEffect } from 'react';
 import { UseAuth } from '../context/AuthProvider';
+import { notifications } from '@mantine/notifications';
+import { IconCheck, IconX } from '@tabler/icons-react';
 
 interface AuthenticationProps extends PaperProps {
   initType: 'login' | 'register'
@@ -43,14 +45,27 @@ export function AuthenticationForm({ initType, onClose, ...props}: Authenticatio
         }
       })
       .then(() => {
-        console.log("Sign up succesful")
+        notifications.show({
+          title: "Account created",
+          message: "Signed up successfully",
+          color: 'cyan',
+          icon: <IconCheck size={18} />,
+          withCloseButton: false,
+        })
         form.setFieldValue('name', '')
         form.setFieldValue('email', '')
         form.setFieldValue('password', '')
         toggle('login')
       })
       .catch(error => {
-        alert(error)
+        notifications.show({
+          title: "Sign up failed",
+          message: "There was a problem creating your account",
+          color: 'red',
+          icon: <IconX size={18} />,
+          withCloseButton: false,
+        })
+        console.log(error)
       })
     }
     else {
@@ -61,11 +76,17 @@ export function AuthenticationForm({ initType, onClose, ...props}: Authenticatio
         }
       })
       .then(() => {
-        console.log("Sign in succesful")
         onClose()
       })
       .catch(error => {
-        alert(error)
+        notifications.show({
+          title: "Login failed",
+          message: "Check your credentials",
+          color: 'red',
+          icon: <IconX size={18} />,
+          withCloseButton: false,
+        })
+        console.log(error)
       })
     }
   }
