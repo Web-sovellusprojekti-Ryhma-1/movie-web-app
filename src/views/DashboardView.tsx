@@ -1,11 +1,11 @@
-import React, {useEffect, useState} from "react";
-import {Box, Title, Modal, Button} from "@mantine/core";
+import {Box, Button, Modal, Title} from "@mantine/core";
 import "@mantine/core/styles.css";
+import {useEffect, useState} from "react";
+import {useLocation} from "wouter";
+import type {TmdbMovie} from "../api/tmdb";
+import {fetchMovieById, fetchPopularMovies} from "../api/tmdb";
 import {MovieCard} from "../components/MovieCard";
 import TheatreAreas from "../components/TheatreAreasfromFinnkino";
-import {fetchPopularMovies, fetchMovieById} from "../api/tmdb";
-import type {TmdbMovie} from "../api/tmdb";
-import {useLocation} from "wouter";
 
 const DashboardView = () => {
     const [popularMovies, setPopularMovies] = useState<TmdbMovie[]>([]);
@@ -17,9 +17,11 @@ const DashboardView = () => {
         const loadPopularMovies = async () => {
             try {
                 const data = await fetchPopularMovies()
-                setPopularMovies(data.results)
+                const movies = Array.isArray(data?.results) ? data.results : []
+                setPopularMovies(movies)
             } catch (error) {
                 console.error("Failed to fetch popular movies:", error)
+                setPopularMovies([])
             }
         }
 
@@ -42,7 +44,7 @@ const DashboardView = () => {
             <Title order={1} mb="xl">Welcome to Movie App</Title>
             <Title order={2} mb="xl">Don't know what to watch?</Title>
 
-            <Button onClick={suggestRandomMovie} style={{ marginBottom: "1rem" }}>
+            <Button onClick={suggestRandomMovie} style={{marginBottom: "1rem"}}>
                 Suggest Random Movie
             </Button>
 
@@ -61,10 +63,10 @@ const DashboardView = () => {
                                     : "https://placehold.co/342x500?text=No+Image"
                             }
                             alt={randomMovie.title}
-                            style={{ width: "100%", marginBottom: "1rem" }}
+                            style={{width: "100%", marginBottom: "1rem"}}
                         />
                         <p>{randomMovie.overview}</p>
-                        <Button onClick={suggestRandomMovie} style={{ marginRight: "1rem" }}>
+                        <Button onClick={suggestRandomMovie} style={{marginRight: "1rem"}}>
                             Suggest Another Movie
                         </Button>
                         <Button onClick={() => navigate(`/movie/${randomMovie.id}`)}>
@@ -74,8 +76,6 @@ const DashboardView = () => {
                 )}
             </Modal>
 
-            
-            
 
             <Title order={3} mb="lg">Popular Now</Title>
             <Box
@@ -88,7 +88,7 @@ const DashboardView = () => {
                 }}
             >
                 {popularMovies.map((movie, index) => (
-                    <Box key={index} style={{ flex: "0 0 auto", width: "200px" }}>
+                    <Box key={index} style={{flex: "0 0 auto", width: "200px"}}>
                         <MovieCard
                             title={movie.title}
                             poster={
@@ -106,7 +106,7 @@ const DashboardView = () => {
                 ))}
             </Box>
 
-            <TheatreAreas />
+            <TheatreAreas/>
         </Box>
     );
 };

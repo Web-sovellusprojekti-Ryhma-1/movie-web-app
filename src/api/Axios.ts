@@ -8,13 +8,13 @@ export const axiosPrivate = axios.create({
 
 axiosPrivate.interceptors.request.use(function (config) {
     const user = JSON.parse(sessionStorage.getItem("user") || "{}")
-    
+
     if (!config.headers) {
-      config.headers = {}
+        config.headers = {}
     }
 
     if (user) {
-        config.headers.Authorization =  `Bearer ${user.token}`;
+        config.headers.Authorization = `Bearer ${user.token}`;
     }
 
     return config;
