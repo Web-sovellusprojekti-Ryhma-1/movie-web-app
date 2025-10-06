@@ -62,10 +62,10 @@ const UserView = () => {
     fetchData();
   }, [id]);
 
-  const handleResult = (confirmed: boolean) => {
+  const handleResult = async (confirmed: boolean) => {
     close()
     if (confirmed) {
-      DeleteUserAccount()
+      await DeleteUserAccount()
       notifications.show({
           title: "Success",
           message: "Account deleted successfully",
