@@ -1,4 +1,4 @@
-import { Paper, Text, Anchor, Group, Button } from "@mantine/core";
+import { Text, Group, Button } from "@mantine/core";
 
 interface ConfirmationWindowProps {
   result: (confirmed: boolean) => void

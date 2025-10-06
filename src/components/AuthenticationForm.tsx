@@ -1,9 +1,11 @@
 import {Anchor, Button, Group, Paper, PasswordInput, Stack, Text, TextInput} from '@mantine/core';
 import type { PaperProps } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { upperFirst, useDisclosure, useToggle } from '@mantine/hooks';
+import { upperFirst, useToggle } from '@mantine/hooks';
 import { useEffect } from 'react';
 import { UseAuth } from '../context/AuthProvider';
+import { notifications } from '@mantine/notifications';
+import { IconCheck, IconX } from '@tabler/icons-react';
 
 interface AuthenticationProps extends PaperProps {
   initType: 'login' | 'register'
@@ -42,15 +44,28 @@ export function AuthenticationForm({ initType, onClose, ...props}: Authenticatio
           password: form.values.password
         }
       })
-      .then(Response => {
-        console.log("Sign up succesful")
+      .then(() => {
+        notifications.show({
+          title: "Account created",
+          message: "Signed up successfully",
+          color: 'cyan',
+          icon: <IconCheck size={18} />,
+          withCloseButton: false,
+        })
         form.setFieldValue('name', '')
         form.setFieldValue('email', '')
         form.setFieldValue('password', '')
         toggle('login')
       })
       .catch(error => {
-        alert(error)
+        notifications.show({
+          title: "Sign up failed",
+          message: "There was a problem creating your account",
+          color: 'red',
+          icon: <IconX size={18} />,
+          withCloseButton: false,
+        })
+        console.log(error)
       })
     }
     else {
@@ -60,12 +75,18 @@ export function AuthenticationForm({ initType, onClose, ...props}: Authenticatio
           password: form.values.password
         }
       })
-      .then(Response => {
-        console.log("Sign in succesful")
+      .then(() => {
         onClose()
       })
       .catch(error => {
-        alert(error)
+        notifications.show({
+          title: "Login failed",
+          message: "Check your credentials",
+          color: 'red',
+          icon: <IconX size={18} />,
+          withCloseButton: false,
+        })
+        console.log(error)
       })
     }
   }

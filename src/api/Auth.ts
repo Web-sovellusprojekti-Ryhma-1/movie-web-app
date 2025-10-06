@@ -1,5 +1,5 @@
 import { axiosPrivate } from './Axios.ts'
-import type { SignUpType, LoginType } from '../context/AuthProvider.tsx'
+import type { SignUpType, LoginType } from '../types/user.ts'
 
 export const SignUpRequest = async (userData: SignUpType) => {
         const response = await axiosPrivate.post("api/user/signup", userData)

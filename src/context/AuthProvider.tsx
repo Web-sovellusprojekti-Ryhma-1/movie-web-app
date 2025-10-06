@@ -1,17 +1,9 @@
 import { useState, useContext, createContext } from 'react'
 import type { ReactNode } from 'react';
 import { SignUpRequest, LoginRequest } from '../api/Auth.ts';
+import type { UserType, SignUpType, LoginType } from '../types/user.ts';
 
-export interface SignUpType {
-    user: { username: string; email: string; password: string }
-}
-
-export interface LoginType {
-    user: { email: string; password: string }
-}
-
-interface AuthContextType {
-  user: { id: number; username: string; email: string; password: string; token: string } | null
+interface AuthContextType extends UserType {
   Login: (userData: LoginType) => Promise<void>
   SignUp: (userData: SignUpType) => Promise<void>
   LogOut: () => Promise<void>
@@ -37,9 +29,9 @@ export function AuthProvider({children}: {children: ReactNode}) {
     }
 
     const Login = async (userData: LoginType) => {
-        const response = await LoginRequest(userData) as { data: { id: number; username: string; email: string; password: string; token: string } };
-        setUser(response.data);
-        sessionStorage.setItem('user', JSON.stringify(response.data));
+        const response = await LoginRequest(userData) as { data: UserType }
+        setUser(response.data)
+        sessionStorage.setItem('user', JSON.stringify(response.data))
     }
 
     const LogOut = async () => {

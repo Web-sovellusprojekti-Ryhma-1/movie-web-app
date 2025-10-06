@@ -1,54 +1,82 @@
 import React from "react";
-import { Group, Grid, Box, Text, Image, Flex, Card, Rating, Paper } from "@mantine/core";
-import type { Movie } from "./Movies";
+import { Box, Text, Card, Rating, Paper, ScrollArea, Anchor } from "@mantine/core";
+import { useLocation } from "wouter";
 
-export interface Review extends Movie {
+export interface ReviewType {
+  user_id: number
+  title: string
   body: string
   rating: number
+  tmdb_id: number
   reviewed_at: string
 }
 
 interface ReviewProps {
-  reviews: Review[];
+  reviews: ReviewType[];
 }
 
 const Reviews: React.FC<ReviewProps> = ({ reviews }) => {
+  const [, setLocation] = useLocation();
+
   if (reviews.length === 0) return null;
 
+  const titleClick = (movieId: number | null) => {
+    setLocation(`/movie/${movieId}`)
+  };
+
   return (
-    <Paper withBorder shadow="sm">
-      
-        <Grid justify="flex-start" align="center" p="md">
-                {reviews.map((rev) => (
-                    <Grid.Col key={rev.id} span={{base: 2, sm: 2, md: 1, lg: 2}}>
-                        <Card shadow="xs" mb="md" withBorder radius="md" p="md" h={220} style={{ display: 'flex', flexDirection: 'column' }}>
-                              <Card.Section>
-                                  <Text ml="xs" mt="xs" fz="lg" fw={500}>
-                                    {rev.title}
-                                  </Text>
-                              </Card.Section>
+    <Box>
+      <Text>Reviews</Text>
 
-                              <div style={{ flex: 1 }}>
-                                <Text fz="sm" mt="xs">
-                                  {rev.body}
-                                </Text>
-                              </div>
+      <Paper withBorder shadow="sm" p="md" w={1200}>
+        <ScrollArea
+          type="hover"
+          offsetScrollbars
+          scrollbarSize={8}
+          style={{ width: '100%' }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              gap: 16,
+            }}
+          >
+            {reviews.map((rev) => (
+              <Card
+                key={rev.tmdb_id}
+                shadow="xs"
+                withBorder
+                radius="md"
+                p="md"
+                style={{ width: 220, height: 220, flex: '0 0 auto' }}
+              >
+                <Card.Section>
+                  <Anchor c="black" fz="lg" fw={600} mt="xs" ml="xs" onClick={() => { titleClick(rev.tmdb_id) }}>
+                    {rev.title}
+                  </Anchor>
+                </Card.Section>
 
-                              <Text mt="auto"  c="dimmed">
-                                <Rating value={rev.rating} readOnly />
-                              </Text>
-                              <Text fz="xs" mt="auto"  c="dimmed">
-                                {rev.reviewed_at}
-                              </Text>
-                            </Card>
-                    </Grid.Col>
-                ))}
-                
-                <Text>Show more</Text>
-        </Grid>
-    </Paper>
-    
-  )
+                <div style={{ flex: 1 }}>
+                  <Text fz="sm" mt="xs">
+                    {rev.body}
+                  </Text>
+                </div>
+
+                <Text mt="auto" c="dimmed">
+                  <Rating value={rev.rating} readOnly />
+                </Text>
+
+                <Text fz="xs" mt="auto" c="dimmed">
+                  {rev.reviewed_at}
+                </Text>
+              </Card>
+            ))}
+          </div>
+        </ScrollArea>
+      </Paper>
+    </Box>
+  );
 }
 
 export default Reviews;
