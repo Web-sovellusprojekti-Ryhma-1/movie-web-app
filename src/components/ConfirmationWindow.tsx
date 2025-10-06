@@ -1,25 +1,25 @@
-import { Text, Group, Button } from "@mantine/core";
+import {Button, Group, Text} from "@mantine/core";
 
 interface ConfirmationWindowProps {
-  result: (confirmed: boolean) => void
+    result: (confirmed: boolean) => void
 }
 
-export function ConfirmationWindow({ result }: ConfirmationWindowProps) {
+export function ConfirmationWindow({result}: ConfirmationWindowProps) {
     return (
         <>
-            
+
             <Text ta="center" size="lg" fw={500}>
                 Are your sure?
             </Text>
 
             <Group justify="space-between" mt="xl">
-            <Button radius="xl" onClick={() => result(false)}>
-                Cancel
-            </Button>
-            <Button radius="xl" onClick={() => result(true)}>
-                Yes
-            </Button>
+                <Button radius="xl" onClick={() => result(false)}>
+                    Cancel
+                </Button>
+                <Button radius="xl" onClick={() => result(true)}>
+                    Yes
+                </Button>
             </Group>
         </>
-  );
+    );
 }

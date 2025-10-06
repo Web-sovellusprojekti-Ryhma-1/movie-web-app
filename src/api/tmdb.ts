@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { ExtendedTmdbMovie } from "../helpers/movieHelpers";
+import type {ExtendedTmdbMovie} from "../helpers/movieHelpers";
 // korjasin tiedostoa ja linkityksen takaisin backendiin
 const BASE_URL = "http://localhost:3001/api/tmdb";
 
@@ -13,6 +13,7 @@ export interface TmdbMovie {
     title: string;
     overview: string;
     release_date?: string;
+    original_title?: string;
     poster_path: string | null;
     vote_average: number;
     genre_ids?: number[];
@@ -75,7 +76,7 @@ export async function discoverMovies(params: DiscoverMoviesParams = {}) {
 
 export async function getGenres() {
     try {
-        const response = await axios.get<{ genres: TmdbGenre[] }>(`${BASE_URL}/genres`);
+        const response = await axios.get<{genres: TmdbGenre[]}>(`${BASE_URL}/genres`);
         console.log("Fetched genres from backend:", response.data.genres); // Debugging
         return response.data.genres;
     } catch (error) {
@@ -120,23 +121,23 @@ export const fetchPopularMovies = async () => {
 
 // titlen mukaan elokuvan haku jotta voidaan käyttää title -> id navigointia finnkinoapin kanssa
 export const searchMovieByTitle = async (title: string) => {
-  try {
-    const response = await axios.get<TmdbPagedResponse<TmdbMovie>>(`${BASE_URL}/search`, {
-      params: { query: title, page: 1, include_adult: false },
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error searching for movie by title:", error);
-    throw error;
-  }
+    try {
+        const response = await axios.get<TmdbPagedResponse<TmdbMovie>>(`${BASE_URL}/search`, {
+            params: {query: title, page: 1, include_adult: false},
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error searching for movie by title:", error);
+        throw error;
+    }
 };
 
 export const fetchMovieById = async (id: number) => {
-  try {
-    const response = await axios.get<TmdbMovie>(`${BASE_URL}/movie/${id}`);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching movie by ID:", error);
-    throw error;
-  }
+    try {
+        const response = await axios.get<TmdbMovie>(`${BASE_URL}/movie/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching movie by ID:", error);
+        throw error;
+    }
 };

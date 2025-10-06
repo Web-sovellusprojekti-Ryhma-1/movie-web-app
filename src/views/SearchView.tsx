@@ -1,21 +1,10 @@
-import {
-    Alert,
-    Box,
-    Center,
-    Grid,
-    Skeleton,
-    Stack,
-    Text,
-    Title,
-    RangeSlider,
-    MultiSelect
-} from "@mantine/core";
+import {Alert, Box, Center, Grid, MultiSelect, RangeSlider, Skeleton, Stack, Text, Title} from "@mantine/core";
 import {IconAlertCircle, IconMovieOff} from "@tabler/icons-react";
 import {useCallback, useEffect, useMemo, useState} from "react";
-import {useSearchParams, useLocation} from "wouter";
-import {searchMovies, getGenres} from "../api/tmdb.ts";
-import {MovieCard} from "../components/MovieCard.tsx";
+import {useLocation, useSearchParams} from "wouter";
 import type {TmdbGenre, TmdbMovie} from "../api/tmdb";
+import {getGenres, searchMovies} from "../api/tmdb.ts";
+import {MovieCard} from "../components/MovieCard.tsx";
 // SearchViewiin lisäsin genre filtterin samalla kun piti muokata hieman api hommien takia koska korjasin linkityksen backendiin.
 const PAGE_SIZE = 20; // TMDB default
 
@@ -150,9 +139,9 @@ const SearchView = () => {
     };
 
     return (
-        <Box style={{ display: "flex" }}>
+        <Box style={{display: "flex"}}>
             {/* Sidebar for filters */}
-            <Box style={{ width: "20%", paddingRight: "1rem" }}>
+            <Box style={{width: "20%", paddingRight: "1rem"}}>
                 <Title order={4}>Filters</Title>
                 <Box mb="lg">
                     <RangeSlider
@@ -167,7 +156,11 @@ const SearchView = () => {
                         max={10}
                         step={0.1}
                         label={(value) => `Rating: ${value}`}
-                        style={{ marginBottom: "3rem", marginLeft: "1rem", marginRight: "1rem" }} // Add spacing below the slider
+                        style={{
+                            marginBottom: "3rem",
+                            marginLeft: "1rem",
+                            marginRight: "1rem"
+                        }} // Add spacing below the slider
                     />
                     <RangeSlider
                         labelAlwaysOn
@@ -177,10 +170,14 @@ const SearchView = () => {
                         max={new Date().getFullYear()}
                         step={1}
                         label={(value) => `Year: ${value}`}
-                        style={{ marginBottom: "3rem", marginLeft: "1rem", marginRight: "1rem" }} // Add spacing below the slider
+                        style={{
+                            marginBottom: "3rem",
+                            marginLeft: "1rem",
+                            marginRight: "1rem"
+                        }} // Add spacing below the slider
                     />
                     <MultiSelect
-                        data={(genres || []).map((g) => ({ value: g.name, label: g.name }))}
+                        data={(genres || []).map((g) => ({value: g.name, label: g.name}))}
                         value={selectedGenres}
                         onChange={setSelectedGenres}
                         placeholder="Select genres"
@@ -190,7 +187,7 @@ const SearchView = () => {
             </Box>
 
             {/* Main content area */}
-            <Box style={{ width: "80%" }}>
+            <Box style={{width: "80%"}}>
                 <Title>Search Movies</Title>
                 {renderResults()}
             </Box>

@@ -56,7 +56,9 @@ const DefaultLayout = ({children}: React.PropsWithChildren) => {
         <>
             {isAuthenticated ? (
                 <Group>
-                    <Button variant="transparent" fw={700} size="sm" onClick={() => NavigateToCurrentUser()}>{user?.username}</Button>
+                    <Button
+                        variant="transparent" fw={700} size="sm" onClick={() => NavigateToCurrentUser()}
+                    >{user?.username}</Button>
                     <Button variant="default" onClick={() => LogOut()}>Log Out</Button>
                 </Group>
             ) : (

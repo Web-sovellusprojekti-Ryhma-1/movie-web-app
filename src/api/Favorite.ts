@@ -1,8 +1,8 @@
-import { axiosPrivate } from './Axios.ts'
+import {axiosPrivate} from './Axios.ts'
 
 export const GetUserFavorites = async (id: number) => {
-        const response = await axiosPrivate.get(`api/favorite/user/${id}`)
-        return response.data
+    const response = await axiosPrivate.get(`api/favorite/user/${id}`)
+    return response.data
 }
 
 export const PostFavorite = async (tmdb_id: number) => {
@@ -11,6 +11,6 @@ export const PostFavorite = async (tmdb_id: number) => {
 }
 
 export const DeleteFavorite = async (id: number) => {
-        const response = await axiosPrivate.delete(`api/favorite/${id}`)
-        return response.data
+    const response = await axiosPrivate.delete(`api/favorite/${id}`)
+    return response.data
 }

@@ -78,10 +78,13 @@ export function MovieCard({
                 </Text>
 
                 <Group grow mt="sm">
-                    <Button variant="outline" onClick={() => {
-                        console.log(`Navigating to /movie/${title}`); // Log the navigation URL
-                        onDetailsClick && onDetailsClick();
-                    }}>
+                    <Button
+                        variant="outline"
+                        onClick={() => {
+                            console.log(`Navigating to /movie/${title}`); // Log the navigation URL
+                            onDetailsClick?.();
+                        }}
+                    >
                         Details
                     </Button>
                 </Group>
