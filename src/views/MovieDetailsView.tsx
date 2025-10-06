@@ -5,6 +5,7 @@ import MovieDetails from "../components/MovieDetails";
 import { transformTmdbMovie } from "../helpers/movieHelpers";
 import { getMovieDetails } from "../api/tmdb";
 import type { MovieDetails as MovieDetailsType } from "../helpers/movieHelpers";
+import { PostFavorite } from "../api/Favorite";
 
 const MovieDetailsView = () => {
   const [, params] = useRoute("/movie/:title");
@@ -13,6 +14,10 @@ const MovieDetailsView = () => {
   const [error, setError] = useState<string | null>(null);
 
   const title = params?.title;
+
+  const addMovieToFavorites = (movieId: number) => {
+    PostFavorite(movieId)
+  }
 
   useEffect(() => {
     const fetchMovieDetails = async () => {
@@ -65,7 +70,7 @@ const MovieDetailsView = () => {
         <MovieDetails
           movie={movie}
           onClose={() => window.history.back()}
-          addToFavorites={(m) => console.log("Add to favorites", m)}
+          addToFavorites={() => { addMovieToFavorites(movie.id) }}
         />
       )}
     </Container>
