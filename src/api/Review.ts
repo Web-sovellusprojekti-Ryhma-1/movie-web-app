@@ -1,13 +1,5 @@
 import {axiosPrivate} from './Axios.ts'
-
-interface ReviewType {
-    review: {title: string, body: string, rating: number, tmdb_id: number}
-}
-
-export const ReviewByMovieId = async (id: number) => {
-    const response = await axiosPrivate.get(`api/review/movie/${id}`)
-    return response.data
-}
+import type { PostReviewType } from '../types/review.ts'
 
 export const ReviewByUserId = async (id: number) => {
     const response = await axiosPrivate.get(`api/review/user/${id}`)
@@ -19,7 +11,7 @@ export const AllReviewsByTmdbId = async (id: number) => {
     return response.data
 }
 
-export const PostReview = async (reviewData: ReviewType) => {
+export const PostReview = async (reviewData: PostReviewType) => {
     const response = await axiosPrivate.post(`api/review`, reviewData)
     return response.data
 }

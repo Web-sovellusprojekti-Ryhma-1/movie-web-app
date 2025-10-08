@@ -2,10 +2,9 @@ import type {PaperProps} from '@mantine/core';
 import {Anchor, Button, Group, Paper, PasswordInput, Stack, Text, TextInput} from '@mantine/core';
 import {useForm} from '@mantine/form';
 import {upperFirst} from '@mantine/hooks';
-import {notifications} from '@mantine/notifications';
-import {IconCheck, IconX} from '@tabler/icons-react';
 import {useEffect, useState} from 'react';
 import {UseAuth} from '../context/AuthProvider';
+import { SuccessNotification } from './SuccessNotification';
 
 interface AuthenticationProps extends PaperProps {
     initType: 'login' | 'register'
@@ -52,12 +51,10 @@ export function AuthenticationForm({initType, onClose, ...props}: Authentication
                 }
             })
                 .then(() => {
-                    notifications.show({
-                        title: "Account created",
-                        message: "Signed up successfully",
-                        color: 'cyan',
-                        icon: <IconCheck size={18}/>,
-                        withCloseButton: false,
+                    SuccessNotification({
+                        success: true,
+                        notifTitle: "Account created",
+                        notifMessage: "Signed up successfully"
                     })
                     form.setFieldValue('name', '')
                     form.setFieldValue('email', '')
@@ -65,12 +62,10 @@ export function AuthenticationForm({initType, onClose, ...props}: Authentication
                     toggleType('login')
                 })
                 .catch(error => {
-                    notifications.show({
-                        title: "Sign up failed",
-                        message: "There was a problem creating your account",
-                        color: 'red',
-                        icon: <IconX size={18}/>,
-                        withCloseButton: false,
+                    SuccessNotification({
+                        success: false,
+                        notifTitle: "Sign up failed",
+                        notifMessage: "There was a problem creating your account"
                     })
                     console.log(error)
                 })
@@ -82,15 +77,18 @@ export function AuthenticationForm({initType, onClose, ...props}: Authentication
                 }
             })
                 .then(() => {
+                    SuccessNotification({
+                        success: true,
+                        notifTitle: "Login successful",
+                        notifMessage: "Welcome back"
+                    })
                     onClose()
                 })
                 .catch(error => {
-                    notifications.show({
-                        title: "Login failed",
-                        message: "Check your credentials",
-                        color: 'red',
-                        icon: <IconX size={18}/>,
-                        withCloseButton: false,
+                    SuccessNotification({
+                        success: false,
+                        notifTitle: "Login failed",
+                        notifMessage: "Check your credentials"
                     })
                     console.log(error)
                 })
