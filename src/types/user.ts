@@ -9,3 +9,9 @@ export interface LoginType {
 export interface UserType {
     user: {id: number; username: string; email: string; token: string} | null
 }
+
+export interface UserRecord {
+    id: number
+    username: string
+    email: string
+}

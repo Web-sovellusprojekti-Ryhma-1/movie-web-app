@@ -9,10 +9,10 @@ export interface ReviewType {
 }
 
 export interface PostReviewType {
-  review: {
-    title: string
-    body: string
-    rating: number
-    tmdb_id: number
-  }
+    review: {
+        title: string
+        body: string
+        rating: number
+        tmdb_id: number
+    }
 }

@@ -1,10 +1,10 @@
 import {Box, Container, Skeleton, Title} from "@mantine/core";
 import {useEffect, useState} from "react";
 import {useRoute} from "wouter";
-import { getMovieDetails } from "../api/tmdb";
+import {getMovieDetails} from "../api/tmdb";
 import MovieDetails from "../components/MovieDetails";
-import { transformTmdbMovie } from "../helpers/movieHelpers";
-import type { MovieDetails as MovieDetailsType } from "../helpers/movieHelpers";
+import type {MovieDetails as MovieDetailsType} from "../helpers/movieHelpers";
+import {transformTmdbMovie} from "../helpers/movieHelpers";
 
 
 const MovieDetailsView = () => {
@@ -13,8 +13,7 @@ const MovieDetailsView = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-  const title = params?.title;
-
+    const title = params?.title;
 
 
     useEffect(() => {

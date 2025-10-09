@@ -1,39 +1,70 @@
-export type GroupRole = "owner" | "admin" | "member"
-
-export interface GroupMember {
+export interface GroupRecord {
     id: number
-    name: string
-    role: GroupRole
-    avatarUrl?: string
-    joinedAt: string
+    group_name: string
+    owner_id: number
+    created_at?: string | null
+    description?: string | null
 }
 
-export interface GroupShowtime {
-    id: string
-    movieTitle: string
-    theatre: string
-    startsAt: string
-    addedBy: number
-    notes?: string
+export interface GroupMemberRecord {
+    id: number
+    group_id: number
+    user_id: number
+    accepted: boolean
+    created_at?: string | null
 }
 
-export interface GroupJoinRequest {
-    id: string
+export interface GroupMemberProfile {
     userId: number
-    name: string
-    requestedAt: string
-    message?: string
+    username: string
+    email: string
+    accepted: boolean
+    isOwner: boolean
 }
 
-export interface GroupSummary {
+export interface GroupShowtimeRecord {
+    id: number
+    group_id: number
+    finnkino_db_id: string
+    area_id: string
+    dateofshow: string
+    created_at?: string | null
+}
+
+export interface GroupShowtimeDetail {
+    id: number
+    finnkinoDbId: string
+    areaId: string
+    dateOfShow: string
+    createdAt?: string | null
+    matchTitle?: string
+    theatreName?: string
+}
+
+export type MembershipStatus = "owner" | "member" | "invited" | "unknown"
+
+export interface GroupListItem {
     id: number
     name: string
-    description: string
     ownerId: number
-    tags: string[]
-    coverImage: string
-    members: GroupMember[]
-    showtimes: GroupShowtime[]
-    pendingRequests: GroupJoinRequest[]
-    createdAt: string
+    ownerName?: string
+    memberCount: number
+    acceptedMemberCount: number
+    pendingMemberCount: number
+    membershipStatus: MembershipStatus
+    nextShowtime?: GroupShowtimeDetail | null
+}
+
+export interface GroupDetails {
+    group: GroupRecord
+    members: GroupMemberProfile[]
+    showtimes: GroupShowtimeDetail[]
+    owner?: GroupMemberProfile
+}
+
+export interface UserGroupRow {
+    id: number
+    group_name: string
+    owner_id?: number
+    accepted?: boolean
 }

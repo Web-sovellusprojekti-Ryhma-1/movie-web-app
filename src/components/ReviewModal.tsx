@@ -1,13 +1,18 @@
-import {Button, Group, Text, Title, Rating, Anchor} from "@mantine/core";
-import type { ReviewType } from "../types/review";
-import { useLocation } from "wouter";
-import { DeleteReview } from "../api/Review";
-import { UseAuth } from "../context/AuthProvider";
+import {Anchor, Button, Group, Rating, Text, Title} from "@mantine/core";
+import {useLocation} from "wouter";
+import {DeleteReview} from "../api/Review";
+import {UseAuth} from "../context/AuthProvider";
+import type {ReviewType} from "../types/review";
 
-export function ReviewModal({ review, closeReview, onDeletion, viewMoviePage }: 
-    { review?: ReviewType, closeReview: () => void, onDeletion: (id: number) => void, viewMoviePage: boolean}) {
-    const [ , setLocation] = useLocation();
-    const { user } = UseAuth();
+export function ReviewModal({review, closeReview, onDeletion, viewMoviePage}:
+                            {
+                                review?: ReviewType,
+                                closeReview: () => void,
+                                onDeletion: (id: number) => void,
+                                viewMoviePage: boolean
+                            }) {
+    const [, setLocation] = useLocation();
+    const {user} = UseAuth();
 
     if (!review) return null
 
@@ -37,15 +42,16 @@ export function ReviewModal({ review, closeReview, onDeletion, viewMoviePage }:
             <Title>
                 {review.title}
             </Title>
-            <Anchor fz="lg" c="black" mt="auto" 
-            onClick={() => goToUserPage(review.user_id)}
+            <Anchor
+                fz="lg" c="black" mt="auto"
+                onClick={() => goToUserPage(review.user_id)}
             >
                 {review.user_email}
             </Anchor>
-            
+
             <Group mt="xl" mb="xl">
-                
-                <Text style={{ whiteSpace: 'pre-wrap' }}>
+
+                <Text style={{whiteSpace: 'pre-wrap'}}>
                     {review.body}
                 </Text>
             </Group>
@@ -56,23 +62,23 @@ export function ReviewModal({ review, closeReview, onDeletion, viewMoviePage }:
                         month: 'long',
                         day: 'numeric',
                         year: 'numeric'
-                        })}
+                    })}
                 </Text>
                 <Group>
-                    {viewMoviePage && 
-                <Button onClick={() => goToMoviePage(review.tmdb_id)}>
-                View movie page
-                </Button>
-                }
-                {user?.id == review.user_id &&
-                <Button color="red" onClick={() => deleteCurrentReview(review.tmdb_id)}>
-                    Delete review
-                </Button>
-                }
+                    {viewMoviePage &&
+                        <Button onClick={() => goToMoviePage(review.tmdb_id)}>
+                            View movie page
+                        </Button>
+                    }
+                    {user?.id == review.user_id &&
+                        <Button color="red" onClick={() => deleteCurrentReview(review.tmdb_id)}>
+                            Delete review
+                        </Button>
+                    }
                 </Group>
-                
+
             </Group>
-            
+
         </>
     );
 }

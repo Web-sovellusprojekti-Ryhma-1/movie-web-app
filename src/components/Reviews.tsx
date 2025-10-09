@@ -1,9 +1,8 @@
-import {Anchor, Box, Card, Paper, Rating, ScrollArea, Text, Modal} from "@mantine/core";
-import React, { useEffect } from "react";
-import type { ReviewType } from "../types/review";
-import { ReviewModal } from "./ReviewModal";
-import { useState } from "react";
-import { useDisclosure } from "@mantine/hooks";
+import {Anchor, Box, Card, Modal, Paper, Rating, ScrollArea, Text} from "@mantine/core";
+import {useDisclosure} from "@mantine/hooks";
+import React, {useEffect, useState} from "react";
+import type {ReviewType} from "../types/review";
+import {ReviewModal} from "./ReviewModal";
 
 
 interface ReviewProps {
@@ -17,21 +16,21 @@ const Reviews: React.FC<ReviewProps> = ({reviews, goToMoviePage}) => {
     const [reviewsList, setReviewsList] = useState(reviews);
 
     useEffect(() => {
-      setReviewsList(reviews);
+        setReviewsList(reviews);
     }, [reviews]);
 
     if (reviews.length === 0) return null;
-    
+
     const handleDeletion = (id: number) => {
-      setReviewsList((prev) => prev.filter((rev) => rev.tmdb_id !== id));
+        setReviewsList((prev) => prev.filter((rev) => rev.tmdb_id !== id));
     }
 
     return (
         <>
             <Box>
                 {goToMoviePage &&
-                <Text>Reviews</Text>}
-                
+                    <Text>Reviews</Text>}
+
                 <Paper withBorder shadow="sm" p="md" w={1200}>
                     <ScrollArea
                         type="hover"
@@ -59,27 +58,28 @@ const Reviews: React.FC<ReviewProps> = ({reviews, goToMoviePage}) => {
                                         <Anchor
                                             c="black" fz="lg" fw={600} mt="xs" ml="xs"
                                             onClick={() => {
-                                              setOpenReview(rev)
-                                              open()
+                                                setOpenReview(rev)
+                                                open()
                                             }}
                                             style={{
-                                              display: 'block',
-                                              width: 210,
-                                              whiteSpace: 'nowrap',
-                                              overflow: 'hidden',
-                                              textOverflow: 'ellipsis',
+                                                display: 'block',
+                                                width: 210,
+                                                whiteSpace: 'nowrap',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis',
                                             }}
-                                            >
+                                        >
                                             {rev.title}
                                         </Anchor>
                                         <Text fz="xs" mt="auto" ml="xs">
-                                          {rev.user_email}
+                                            {rev.user_email}
                                         </Text>
                                     </Card.Section>
 
                                     <div style={{flex: 1}}>
-                                        <Text fz="sm" mt="xs"
-                                        lineClamp={5}
+                                        <Text
+                                            fz="sm" mt="xs"
+                                            lineClamp={5}
                                         >
                                             {rev.body}
                                         </Text>
@@ -100,7 +100,9 @@ const Reviews: React.FC<ReviewProps> = ({reviews, goToMoviePage}) => {
             </Box>
 
             <Modal opened={opened} onClose={close} size="xl" title="Review">
-                <ReviewModal review={openReview} closeReview={close} onDeletion={handleDeletion} viewMoviePage={goToMoviePage}/>
+                <ReviewModal
+                    review={openReview} closeReview={close} onDeletion={handleDeletion} viewMoviePage={goToMoviePage}
+                />
             </Modal>
         </>
     );
