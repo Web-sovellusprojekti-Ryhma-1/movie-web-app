@@ -12,7 +12,6 @@ import {
     Stack,
     Text,
     Textarea,
-    TextInput,
     Title,
 } from "@mantine/core";
 import {DatePickerInput} from "@mantine/dates";
@@ -27,22 +26,25 @@ import {
     normalizeTitleForComparison,
 } from "../helpers/finnkinoHelpers";
 import type {MovieDetails as MovieDetailsType} from "../helpers/movieHelpers";
+import type { ReviewType, PostReviewType } from "../types/review";
+import { UseAuth } from "../context/AuthProvider";
+import { GetUserFavorites } from "../api/Favorite";
+import type { FavoriteType } from "../types/favorite";
+import { PostReview, AllReviewsByTmdbId } from "../api/Review";
+import { PostFavorite, DeleteFavorite } from "../api/Favorite";
+import Reviews from "./Reviews";
+import { notifications } from "@mantine/notifications";
+
 
 interface MovieDetailsProps {
     movie: MovieDetailsType
     onClose: () => void
-    addToFavorites: (movie: MovieDetailsType) => void
 }
 
-const MovieDetails: React.FC<MovieDetailsProps> = ({movie, onClose, addToFavorites}) => {
-    const [reviews, setReviews] = useState([
-        {title: "Sample review 1", text: "This is a great movie!", rating: 4},
-        {title: "Sample review 2", text: "Not bad, could be better.", rating: 3},
-        {title: "Sample review 3", text: "I didn't like it that much.", rating: 2}
-    ]) // arvostelut
+const MovieDetails: React.FC<MovieDetailsProps> = ({movie, onClose}) => {
+    const [reviews, setReviews] = useState<ReviewType[]>([]) // arvostelut
     const [isModalOpen, setIsModalOpen] = useState(false) // modaalin näkyvyys jotta voidaan triggeröidä napista
     const [newReview, setNewReview] = useState("") // uusi arvostelu
-    const [newReviewTitle, setNewReviewTitle] = useState("") // arvostelun otsikko
     const [newRating, setNewRating] = useState<number>(0) // arvostelun arvosanan parametri
     const [selectedDate, setSelectedDate] = useState<string | null>(dayjs().format("YYYY-MM-DD"))
     const [theatreAreas, setTheatreAreas] = useState<Array<{value: string; label: string}>>([])
@@ -50,6 +52,88 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({movie, onClose, addToFavorit
     const [showtimes, setShowtimes] = useState<FinnkinoShowtime[]>([])
     const [showtimesLoading, setShowtimesLoading] = useState(false)
     const [showtimesError, setShowtimesError] = useState<string | null>(null)
+    const [isFavorited, setIsFavorited] = useState(false)
+    const [newReviewPosted, setNewReviewPosted] = useState(false)
+
+    const { user } = UseAuth();
+    const isAuthenticated = user !== null;
+
+    const addMovieToFavorites = async (movieId: number) => {
+        try {
+            await PostFavorite(movieId)
+            setIsFavorited(true)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const removeMovieFromFavorites = async (movieId: number) => {
+        try {
+            await DeleteFavorite(movieId)
+            setIsFavorited(false)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const postMovieReview = async (movieReview: PostReviewType) => {
+        try {
+            await PostReview(movieReview)
+            setNewReviewPosted(true)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const WriteReviewButton = () => {
+        if (isAuthenticated) {
+            setIsModalOpen(true)
+        } else {
+            notifications.show({
+                title: "Login required",
+                message: "Please log in to write a review",
+                color: "cyan",
+                withCloseButton: false
+            })
+        }
+    }
+
+    useEffect(() => {
+        setNewReviewPosted(false)
+
+        const fetchMovieReviews = async () => {
+            try {
+                const response = await AllReviewsByTmdbId(movie.id) as {data: {rows: ReviewType[]}}
+                setReviews(response.data.rows)
+            } catch (error) {
+                console.log(error)
+            }
+        }
+        fetchMovieReviews()
+    }, [newReviewPosted])
+
+    useEffect(() => {
+        if (!isAuthenticated) return;
+
+        const isMovieFavorited = async () => {
+            try {
+                const response = await GetUserFavorites(user.id) as {data: {rows: FavoriteType[]}}
+
+                const allUserFavorites = response.data.rows
+
+                const isMovieFavorited = allUserFavorites.some(
+                    (fav: { tmdb_id: number }) => fav.tmdb_id == movie.id
+                )
+
+                if (isMovieFavorited) {
+                    setIsFavorited(true)
+                }
+            } catch (error) {
+                console.log(error)
+            }
+        }
+        isMovieFavorited()
+    }, [])
 
     useEffect(() => {
         let isMounted = true
@@ -191,13 +275,17 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({movie, onClose, addToFavorit
     }, [showtimes, movieTitleNormalized, movieOriginalTitleNormalized, movieReleaseYear])
     // riviewille funktio parametrit
     const addReview = () => {
-        if (newReview.trim() && newReviewTitle.trim()) {
-            setReviews([
-                ...reviews,
-                {title: newReviewTitle, text: newReview, rating: newRating}
-            ]) // uuen arvostelun lisäämisen kentät:
+        if (newReview.trim() && newRating != 0) {
+            postMovieReview({
+                review: {
+                    title: movie.title,
+                    body: newReview,
+                    rating: newRating,
+                    tmdb_id: movie.id
+                }
+            })
+
             setNewReview("")
-            setNewReviewTitle("")
             setNewRating(0)
             setIsModalOpen(false)
         }
@@ -267,56 +355,52 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({movie, onClose, addToFavorit
                 </Box>
             </Box>
             {/* Add to Favorites napin positio sivulla */}
-            <Button
-                onClick={() => addToFavorites(movie)}
-                style={{
-                    position: "fixed",
-                    top: "6.58rem",
-                    right: "1rem",
-                    zIndex: 1,
-                }}
-            >
-                Add to Favorites
-            </Button>
+            <>
+                {isAuthenticated && !isFavorited && (
+                    <Button
+                        onClick={() => addMovieToFavorites(movie.id)}
+                        style={{
+                        position: "fixed",
+                        top: "6.58rem",
+                        right: "1rem",
+                        zIndex: 1,
+                    }}>
+                        Add to Favorites
+                    </Button>
+                )}
+
+                {isAuthenticated && isFavorited && (
+                    <Button
+                        onClick={() => removeMovieFromFavorites(movie.id)}
+                        style={{
+                        position: "fixed",
+                        top: "6.58rem",
+                        right: "1rem",
+                        zIndex: 1,
+                    }}>
+                        Remove from favorites
+                    </Button>
+                )}
+            </>
+            
+            
             {/* movie app arvostelu kenttä */}
             <Box>
-                <Title order={3} style={{marginTop: "2rem"}}>Movie App User Reviews</Title>
-                <Box
-                    style={{display: "flex", overflowX: "auto", gap: "1rem", padding: "1rem", whiteSpace: "nowrap"}}
-                > {/* vieritys palkki jotta voi scrollailla arvosteluja */}
-                    {reviews.map((review, index) => (
-                        <Box
-                            key={index} style={{
-                            display: "inline-block",
-                            minWidth: "300px",
-                            border: "1px solid #ccc",
-                            padding: "1rem",
-                            wordWrap: "break-word",
-                            whiteSpace: "normal"
-                        }}
-                        >
-                            <div>
-                                <strong>{review.title}</strong>
-                                <Rating
-                                    value={review.rating} readOnly
-                                /> {/* read onlyksi tähdet niin niitä ei voi muuttaa itse sivulla */}
-                            </div>
-                            {review.text}
-                        </Box>
-                    ))}
-                </Box>
-                <Button style={{marginTop: "1rem"}} onClick={() => setIsModalOpen(true)}>Add
-                    Review</Button> {/* modaalin triggeröivä nappi */}
+                <Title mb="md" order={3} style={{marginTop: "2rem"}}>User Reviews</Title>
+                
+                 {/* vieritys palkki jotta voi scrollailla arvosteluja */}
+                <Reviews reviews={reviews} goToMoviePage={false}/>
+                
+                <Button style={{marginTop: "1rem"}} onClick={() => WriteReviewButton()}>
+                    Write a review
+                </Button> {/* modaalin triggeröivä nappi */}
 
                 <Modal
                     opened={isModalOpen} onClose={() => setIsModalOpen(false)} title="Add a Review"
                 > {/* Modaali eli popup ikkuna arvostelun luontiin */}
-                    <TextInput
-                        label="Title"
-                        value={newReviewTitle}
-                        onChange={(event) => setNewReviewTitle(event.currentTarget.value)}
-                        size="sm"
-                    />
+                    <Text size="lg" fw={500}>
+                        {movie.title}
+                    </Text>
                     <Textarea
                         label="Review"
                         value={newReview}

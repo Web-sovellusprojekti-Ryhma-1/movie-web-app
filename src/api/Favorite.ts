@@ -6,7 +6,7 @@ export const GetUserFavorites = async (id: number) => {
 }
 
 export const PostFavorite = async (tmdb_id: number) => {
-    const response = await axiosPrivate.post(`api/favorite`, tmdb_id)
+    const response = await axiosPrivate.post(`api/favorite`, {tmdb_id})
     return response.data
 }
 

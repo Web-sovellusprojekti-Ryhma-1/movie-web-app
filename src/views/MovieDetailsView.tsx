@@ -1,10 +1,11 @@
 import {Box, Container, Skeleton, Title} from "@mantine/core";
 import {useEffect, useState} from "react";
 import {useRoute} from "wouter";
-import {getMovieDetails} from "../api/tmdb";
+import { getMovieDetails } from "../api/tmdb";
 import MovieDetails from "../components/MovieDetails";
-import type {MovieDetails as MovieDetailsType} from "../helpers/movieHelpers";
-import {transformTmdbMovie} from "../helpers/movieHelpers";
+import { transformTmdbMovie } from "../helpers/movieHelpers";
+import type { MovieDetails as MovieDetailsType } from "../helpers/movieHelpers";
+
 
 const MovieDetailsView = () => {
     const [, params] = useRoute("/movie/:title");
@@ -12,7 +13,9 @@ const MovieDetailsView = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const title = params?.title;
+  const title = params?.title;
+
+
 
     useEffect(() => {
         const fetchMovieDetails = async () => {
@@ -65,7 +68,6 @@ const MovieDetailsView = () => {
                 <MovieDetails
                     movie={movie}
                     onClose={() => window.history.back()}
-                    addToFavorites={(m) => console.log("Add to favorites", m)}
                 />
             )}
         </Container>

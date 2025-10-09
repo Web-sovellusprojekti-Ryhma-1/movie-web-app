@@ -9,9 +9,9 @@ import {GetUserFavorites} from "../api/Favorite";
 import {ReviewByUserId} from "../api/Review";
 import {DeleteUserAccount, UserByIdRequest} from "../api/User";
 import {ConfirmationWindow} from "../components/ConfirmationWindow";
-import type {FavoriteType} from "../components/Favorites";
+import type { FavoriteType } from "../types/favorite";
 import Favorites from "../components/Favorites";
-import type {ReviewType} from "../components/Reviews";
+import type { ReviewType } from "../types/review";
 import Reviews from "../components/Reviews";
 import {UseAuth} from "../context/AuthProvider";
 
@@ -63,10 +63,10 @@ const UserView = () => {
         fetchData();
     }, [id]);
 
-    const handleResult = (confirmed: boolean) => {
+    const handleResult = async (confirmed: boolean) => {
         close()
         if (confirmed) {
-            DeleteUserAccount()
+            await DeleteUserAccount()
             notifications.show({
                 title: "Success",
                 message: "Account deleted successfully",
@@ -81,7 +81,7 @@ const UserView = () => {
     const ShowUserDeletionButton = (
         <>
             {user?.id == id ? (
-                <Button ml={770} onClick={() => open()}>Delete my account</Button>
+                <Button onClick={() => open()}>Delete my account</Button>
             ) : (
                 null
             )}
@@ -93,14 +93,17 @@ const UserView = () => {
     return (
         <>
             <Box>
-                <Group p={20} ml="100" mb="sm">
-                    <Text size="xl" fw={700} ta="center">{profileUser?.username || "Username"}</Text>
-                    <Text ml="80" c="dimmed">{profileUser?.email || "name@email.com"}</Text>
+                <Group p={20} ml="100" mr="110" justify="space-between">
+                    <div>
+                        <Text size="xl" fw={700}>{profileUser?.username || "Username"}</Text>
+                        <Text c="dimmed">{profileUser?.email || "name@email.com"}</Text>
+                    </div>
                     {ShowUserDeletionButton}
                 </Group>
-
+                
                 <Group ml={120}>
-                    <Reviews reviews={MovieReviews}/>
+                    
+                    <Reviews reviews={MovieReviews} goToMoviePage={true}/>
                     <Space h="md"/>
                     <Favorites favorites={UserFavorites}/>
                 </Group>
