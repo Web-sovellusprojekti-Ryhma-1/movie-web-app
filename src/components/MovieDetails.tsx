@@ -15,10 +15,15 @@ import {
     Title,
 } from "@mantine/core";
 import {DatePickerInput} from "@mantine/dates";
+import {notifications} from "@mantine/notifications";
 import {IconClock, IconMapPin} from "@tabler/icons-react";
 import dayjs from "dayjs";
 import React, {useEffect, useMemo, useState} from "react";
+import {DeleteFavorite, GetUserFavorites, PostFavorite} from "../api/Favorite";
 import {fetchShowtimes, fetchTheatreAreas, type FinnkinoTheatreAreasResponse,} from "../api/finnkinoapi";
+import {createGroupShowtime, listGroupsForUser} from "../api/Group";
+import {AllReviewsByTmdbId, PostReview} from "../api/Review";
+import {UseAuth} from "../context/AuthProvider";
 import {
     type FinnkinoShowtime,
     formatFinnkinoDuration,
@@ -26,14 +31,10 @@ import {
     normalizeTitleForComparison,
 } from "../helpers/finnkinoHelpers";
 import type {MovieDetails as MovieDetailsType} from "../helpers/movieHelpers";
-import type { ReviewType, PostReviewType } from "../types/review";
-import { UseAuth } from "../context/AuthProvider";
-import { GetUserFavorites } from "../api/Favorite";
-import type { FavoriteType } from "../types/favorite";
-import { PostReview, AllReviewsByTmdbId } from "../api/Review";
-import { PostFavorite, DeleteFavorite } from "../api/Favorite";
+import type {FavoriteType} from "../types/favorite";
+import type {UserGroupRow} from "../types/group";
+import type {PostReviewType, ReviewType} from "../types/review";
 import Reviews from "./Reviews";
-import { notifications } from "@mantine/notifications";
 
 
 interface MovieDetailsProps {
@@ -54,8 +55,15 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({movie, onClose}) => {
     const [showtimesError, setShowtimesError] = useState<string | null>(null)
     const [isFavorited, setIsFavorited] = useState(false)
     const [newReviewPosted, setNewReviewPosted] = useState(false)
+    const [userGroups, setUserGroups] = useState<UserGroupRow[]>([])
+    const [groupsLoading, setGroupsLoading] = useState(false)
+    const [groupFetchError, setGroupFetchError] = useState<string | null>(null)
+    const [scheduleModalOpen, setScheduleModalOpen] = useState(false)
+    const [scheduleTarget, setScheduleTarget] = useState<FinnkinoShowtime | null>(null)
+    const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null)
+    const [scheduleSubmitting, setScheduleSubmitting] = useState(false)
 
-    const { user } = UseAuth();
+    const {user} = UseAuth();
     const isAuthenticated = user !== null;
 
     const addMovieToFavorites = async (movieId: number) => {
@@ -122,7 +130,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({movie, onClose}) => {
                 const allUserFavorites = response.data.rows
 
                 const isMovieFavorited = allUserFavorites.some(
-                    (fav: { tmdb_id: number }) => fav.tmdb_id == movie.id
+                    (fav: {tmdb_id: number}) => fav.tmdb_id == movie.id
                 )
 
                 if (isMovieFavorited) {
@@ -134,6 +142,47 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({movie, onClose}) => {
         }
         isMovieFavorited()
     }, [])
+
+    useEffect(() => {
+        if (!isAuthenticated || !user?.id) {
+            setUserGroups([])
+            setGroupFetchError(null)
+            return
+        }
+
+        const userId = user.id
+        let isMounted = true
+        setGroupsLoading(true)
+        setGroupFetchError(null)
+
+        const loadGroups = async () => {
+            try {
+                const rows = await listGroupsForUser(userId)
+                if (!isMounted) {
+                    return
+                }
+                const acceptedGroups = rows.filter((row) => row.accepted !== false)
+                setUserGroups(acceptedGroups)
+            } catch (error) {
+                if (!isMounted) {
+                    return
+                }
+                console.error("Failed to load user groups", error)
+                setUserGroups([])
+                setGroupFetchError("We couldn't load your groups right now.")
+            } finally {
+                if (isMounted) {
+                    setGroupsLoading(false)
+                }
+            }
+        }
+
+        void loadGroups()
+
+        return () => {
+            isMounted = false
+        }
+    }, [isAuthenticated, user?.id])
 
     useEffect(() => {
         let isMounted = true
@@ -202,6 +251,16 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({movie, onClose}) => {
             isMounted = false
         }
     }, [selectedTheatreArea, selectedDate])
+
+    const groupOptions = useMemo(
+        () => userGroups.map((group) => ({
+            value: group.id.toString(),
+            label: group.group_name,
+        })),
+        [userGroups],
+    )
+
+    const hasAvailableGroups = groupOptions.length > 0
 
     const movieTitleNormalized = useMemo(
         () => normalizeTitleForComparison(movie.title),
@@ -291,6 +350,127 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({movie, onClose}) => {
         }
     }
 
+    const closeScheduleModal = () => {
+        setScheduleModalOpen(false)
+        setScheduleTarget(null)
+        setScheduleSubmitting(false)
+        setSelectedGroupId(null)
+    }
+
+    const openScheduleModal = (show: FinnkinoShowtime) => {
+        if (!isAuthenticated) {
+            notifications.show({
+                title: "Login required",
+                message: "Sign in to add showtimes to your groups.",
+                color: "cyan",
+            })
+            return
+        }
+
+        if (groupsLoading) {
+            notifications.show({
+                title: "Fetching groups",
+                message: "Hold on a moment while we load your groups.",
+                color: "blue",
+            })
+            return
+        }
+
+        if (!hasAvailableGroups) {
+            notifications.show({
+                title: "No groups available",
+                message: "Create or join a group before scheduling showtimes.",
+                color: "yellow",
+            })
+            return
+        }
+
+        const areaId = show.areaId ?? selectedTheatreArea
+        if (!areaId) {
+            notifications.show({
+                title: "Select theatre area",
+                message: "Choose a theatre area before adding this showtime to a group.",
+                color: "yellow",
+            })
+            return
+        }
+
+        setScheduleTarget(show)
+        setScheduleModalOpen(true)
+        setSelectedGroupId((current) => {
+            if (current && groupOptions.some((option) => option.value === current)) {
+                return current
+            }
+            return groupOptions[0]?.value ?? null
+        })
+    }
+
+    const handleScheduleShowtime = async () => {
+        if (!scheduleTarget || !selectedGroupId) {
+            return
+        }
+
+        const groupId = Number(selectedGroupId)
+        if (!Number.isInteger(groupId)) {
+            notifications.show({
+                title: "Invalid group",
+                message: "Please choose a valid group before continuing.",
+                color: "red",
+            })
+            return
+        }
+
+        const finnkinoId = scheduleTarget.eventId ?? scheduleTarget.showId ?? scheduleTarget.id
+        if (!finnkinoId) {
+            notifications.show({
+                title: "Missing Finnkino ID",
+                message: "This showtime is missing an identifier. Try another screening.",
+                color: "red",
+            })
+            return
+        }
+
+        const areaId = scheduleTarget.areaId ?? selectedTheatreArea
+        if (!areaId) {
+            notifications.show({
+                title: "Select theatre area",
+                message: "Choose a theatre area before adding this showtime to a group.",
+                color: "yellow",
+            })
+            return
+        }
+
+        setScheduleSubmitting(true)
+        try {
+            await createGroupShowtime(groupId, {
+                showtime: {
+                    finnkino_db_id: finnkinoId,
+                    area_id: areaId,
+                    dateofshow: dayjs(scheduleTarget.start).format("YYYY-MM-DD"),
+                },
+            })
+            const targetGroup = userGroups.find((group) => group.id === groupId)
+            notifications.show({
+                title: "Showtime added",
+                message: targetGroup
+                    ? `The screening is now listed in “${targetGroup.group_name}”.`
+                    : "The screening is now listed in your group's upcoming theatre times.",
+                color: "teal",
+            })
+            window.dispatchEvent(new CustomEvent("group-showtime-added", {detail: {groupId}}))
+            closeScheduleModal()
+        } catch (error) {
+            console.error("Failed to add showtime to group", error)
+            notifications.show({
+                title: "Unable to add showtime",
+                message: "Please try again in a moment.",
+                color: "red",
+            })
+        } finally {
+            setScheduleSubmitting(false)
+        }
+    }
+
     return (
         <Box>
             <Button onClick={onClose} mb="md">
@@ -360,11 +540,12 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({movie, onClose}) => {
                     <Button
                         onClick={() => addMovieToFavorites(movie.id)}
                         style={{
-                        position: "fixed",
-                        top: "6.58rem",
-                        right: "1rem",
-                        zIndex: 1,
-                    }}>
+                            position: "fixed",
+                            top: "6.58rem",
+                            right: "1rem",
+                            zIndex: 1,
+                        }}
+                    >
                         Add to Favorites
                     </Button>
                 )}
@@ -373,24 +554,25 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({movie, onClose}) => {
                     <Button
                         onClick={() => removeMovieFromFavorites(movie.id)}
                         style={{
-                        position: "fixed",
-                        top: "6.58rem",
-                        right: "1rem",
-                        zIndex: 1,
-                    }}>
+                            position: "fixed",
+                            top: "6.58rem",
+                            right: "1rem",
+                            zIndex: 1,
+                        }}
+                    >
                         Remove from favorites
                     </Button>
                 )}
             </>
-            
-            
+
+
             {/* movie app arvostelu kenttä */}
             <Box>
                 <Title mb="md" order={3} style={{marginTop: "2rem"}}>User Reviews</Title>
-                
-                 {/* vieritys palkki jotta voi scrollailla arvosteluja */}
+
+                {/* vieritys palkki jotta voi scrollailla arvosteluja */}
                 <Reviews reviews={reviews} goToMoviePage={false}/>
-                
+
                 <Button style={{marginTop: "1rem"}} onClick={() => WriteReviewButton()}>
                     Write a review
                 </Button> {/* modaalin triggeröivä nappi */}
@@ -488,32 +670,66 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({movie, onClose}) => {
                                             padding: "1rem",
                                         }}
                                     >
-                                        <Group justify="space-between" align="flex-start" gap="sm" wrap="wrap">
-                                            <Group gap="sm" align="center">
-                                                <IconClock size={16}/>
-                                                <Text fw={600}>{dayjs(show.start).format("HH:mm")}</Text>
+                                        <Stack gap="sm">
+                                            <Group justify="space-between" align="flex-start" gap="sm" wrap="wrap">
+                                                <Group gap="sm" align="center">
+                                                    <IconClock size={16}/>
+                                                    <Text fw={600}>{dayjs(show.start).format("HH:mm")}</Text>
+                                                </Group>
+                                                <Group gap="xs" align="center">
+                                                    <IconMapPin size={16} color="var(--mantine-color-dimmed)"/>
+                                                    <Text size="sm">
+                                                        {show.theatre}
+                                                        {show.auditorium ? ` • ${show.auditorium}` : ""}
+                                                    </Text>
+                                                </Group>
+                                                <Group gap="xs">
+                                                    {show.presentationMethod && (
+                                                        <Badge
+                                                            variant="light" size="sm"
+                                                        >{show.presentationMethod}</Badge>
+                                                    )}
+                                                    {show.rating && (
+                                                        <Badge
+                                                            variant="light" size="sm" color="grape"
+                                                        >{show.rating}</Badge>
+                                                    )}
+                                                    {durationLabel && (
+                                                        <Badge
+                                                            variant="light" size="sm" color="blue"
+                                                        >{durationLabel}</Badge>
+                                                    )}
+                                                </Group>
                                             </Group>
-                                            <Group gap="xs" align="center">
-                                                <IconMapPin size={16} color="var(--mantine-color-dimmed)"/>
-                                                <Text size="sm">
-                                                    {show.theatre}
-                                                    {show.auditorium ? ` • ${show.auditorium}` : ""}
+
+                                            {isAuthenticated ? (
+                                                <Group gap="xs" align="center">
+                                                    <Button
+                                                        size="xs"
+                                                        variant="light"
+                                                        onClick={() => openScheduleModal(show)}
+                                                        disabled={groupsLoading || !hasAvailableGroups}
+                                                    >
+                                                        Add to group
+                                                    </Button>
+                                                    {groupsLoading && <Loader size="xs"/>}
+                                                    {!groupsLoading && !hasAvailableGroups && !groupFetchError && (
+                                                        <Text size="xs" c="dimmed">
+                                                            Create or join a group to schedule this showtime.
+                                                        </Text>
+                                                    )}
+                                                    {groupFetchError && (
+                                                        <Text size="xs" c="red">
+                                                            {groupFetchError}
+                                                        </Text>
+                                                    )}
+                                                </Group>
+                                            ) : (
+                                                <Text size="xs" c="dimmed">
+                                                    Sign in to add this showtime to a group.
                                                 </Text>
-                                            </Group>
-                                            <Group gap="xs">
-                                                {show.presentationMethod && (
-                                                    <Badge variant="light" size="sm">{show.presentationMethod}</Badge>
-                                                )}
-                                                {show.rating && (
-                                                    <Badge variant="light" size="sm" color="grape">{show.rating}</Badge>
-                                                )}
-                                                {durationLabel && (
-                                                    <Badge
-                                                        variant="light" size="sm" color="blue"
-                                                    >{durationLabel}</Badge>
-                                                )}
-                                            </Group>
-                                        </Group>
+                                            )}
+                                        </Stack>
                                     </Box>
                                 )
                             })}
@@ -521,6 +737,50 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({movie, onClose}) => {
                     )}
                 </Box>
             </Box>
+
+            <Modal opened={scheduleModalOpen} onClose={closeScheduleModal} title="Add to group" size="md">
+                {scheduleTarget ? (
+                    <Stack gap="md">
+                        <Box>
+                            <Text fw={600}>{movie.title}</Text>
+                            <Text size="sm" c="dimmed">
+                                {dayjs(scheduleTarget.start).format("dddd, DD MMM YYYY • HH:mm")} • {scheduleTarget.theatre}
+                                {scheduleTarget.auditorium ? ` (${scheduleTarget.auditorium})` : ""}
+                            </Text>
+                        </Box>
+                        {groupFetchError && (
+                            <Alert color="red" variant="light">
+                                {groupFetchError}
+                            </Alert>
+                        )}
+                        <Select
+                            label="Choose group"
+                            placeholder={groupsLoading ? "Loading groups..." : "Select a group"}
+                            data={groupOptions}
+                            value={selectedGroupId}
+                            onChange={(value) => setSelectedGroupId(value)}
+                            nothingFoundMessage="No groups available"
+                            disabled={!hasAvailableGroups || groupsLoading}
+                        />
+                        <Group justify="flex-end" gap="sm">
+                            <Button variant="subtle" type="button" onClick={closeScheduleModal}>
+                                Cancel
+                            </Button>
+                            <Button
+                                onClick={handleScheduleShowtime}
+                                loading={scheduleSubmitting}
+                                disabled={!hasAvailableGroups || groupsLoading}
+                            >
+                                Add showtime
+                            </Button>
+                        </Group>
+                    </Stack>
+                ) : (
+                    <Group justify="center" py="md">
+                        <Loader/>
+                    </Group>
+                )}
+            </Modal>
         </Box>
     );
 };

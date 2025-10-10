@@ -4,7 +4,7 @@ import {useForm} from '@mantine/form';
 import {upperFirst} from '@mantine/hooks';
 import {useEffect, useState} from 'react';
 import {UseAuth} from '../context/AuthProvider';
-import { SuccessNotification } from './SuccessNotification';
+import {SuccessNotification} from './SuccessNotification';
 
 interface AuthenticationProps extends PaperProps {
     initType: 'login' | 'register'

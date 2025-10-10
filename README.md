@@ -45,6 +45,8 @@ export default tseslint.config([
   - Finnkino integrations live under `src/api/finnkinoapi.ts` and are normalised with helpers from `src/helpers/finnkinoHelpers.ts`.
   - The dashboard (`src/views/DashboardView.tsx`) now surfaces Finnkino showtimes, matches them against TMDB via the backend `/api/match` endpoint, and lets you jump directly into `MovieDetailsView`.
   - Individual movie pages (`src/views/MovieDetailsView.tsx`) include a local showtime finder so that users can cross-reference Finnkino schedules with TMDB metadata.
+  - Groups pages (`src/views/GroupsListView.tsx` and `src/views/GroupDetailsView.tsx`) call the real `/api/group/*` endpoints. Sign in first to populate the lists, and ensure the backend is seeded with groups, members, and showtimes.
+  - The `src/helpers/groupHelpers.ts` module centralises membership and showtime logic. Run `npm run test` to execute the accompanying Vitest coverage before shipping changes to group flows.
   - Run `npm run lint` before committing to ensure TypeScript + ESLint checks stay green.
 
 You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:

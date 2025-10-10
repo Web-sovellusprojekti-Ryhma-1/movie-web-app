@@ -1,5 +1,5 @@
+import type {PostReviewType} from '../types/review.ts'
 import {axiosPrivate} from './Axios.ts'
-import type { PostReviewType } from '../types/review.ts'
 
 export const ReviewByUserId = async (id: number) => {
     const response = await axiosPrivate.get(`api/review/user/${id}`)

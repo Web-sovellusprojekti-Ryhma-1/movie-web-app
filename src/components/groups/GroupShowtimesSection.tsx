@@ -1,18 +1,24 @@
 import {ActionIcon, Card, Group, Stack, Text, Title, Tooltip} from "@mantine/core"
-import {IconTrash} from "@tabler/icons-react"
+import {IconExternalLink, IconTrash} from "@tabler/icons-react"
 import dayjs from "dayjs"
-import type {GroupMember, GroupShowtime} from "../../types/group"
+import type {GroupShowtimeDetail} from "../../types/group"
 
 interface GroupShowtimesSectionProps {
-    showtimes: GroupShowtime[]
-    members: GroupMember[]
+    showtimes: GroupShowtimeDetail[]
     isOwner: boolean
-    onRemoveShowtime: (id: string) => void
+    isBusy?: boolean
+    onRemoveShowtime: (id: number) => void
 }
 
-export function GroupShowtimesSection({showtimes, members, isOwner, onRemoveShowtime}: GroupShowtimesSectionProps) {
-    const memberById = new Map(members.map((member) => [member.id, member]))
+const getFinnkinoUrl = (eventId: string) =>
+    `https://www.finnkino.fi/eng/Event/${encodeURIComponent(eventId)}`
 
+export function GroupShowtimesSection({
+                                          showtimes,
+                                          isOwner,
+                                          isBusy = false,
+                                          onRemoveShowtime
+                                      }: GroupShowtimesSectionProps) {
     if (showtimes.length === 0) {
         return (
             <Card withBorder radius="lg" padding="lg" shadow="sm">
@@ -20,11 +26,15 @@ export function GroupShowtimesSection({showtimes, members, isOwner, onRemoveShow
                     Upcoming theatre times
                 </Title>
                 <Text size="sm" c="dimmed">
-                    No screenings scheduled yet. Share a Finnkino link with the group to get started.
+                    {isOwner
+                        ? "No screenings scheduled yet. Use \"Schedule showtime\" to add the first screening."
+                        : "No screenings scheduled yet. Check back once the owner adds one."}
                 </Text>
             </Card>
         )
     }
+
+    const sortedShowtimes = [...showtimes].sort((a, b) => dayjs(a.dateOfShow).valueOf() - dayjs(b.dateOfShow).valueOf())
 
     return (
         <Card withBorder radius="lg" padding="lg" shadow="sm">
@@ -33,38 +43,52 @@ export function GroupShowtimesSection({showtimes, members, isOwner, onRemoveShow
             </Title>
 
             <Stack gap="md">
-                {showtimes.map((showtime) => {
-                    const addedBy = memberById.get(showtime.addedBy)
+                {sortedShowtimes.map((showtime) => {
+                    const date = dayjs(showtime.dateOfShow)
                     return (
                         <Card key={showtime.id} withBorder padding="md" radius="md" shadow="xs">
                             <Group justify="space-between" align="flex-start">
                                 <Stack gap={4}>
-                                    <Text fw={600}>{showtime.movieTitle}</Text>
+                                    <Text
+                                        fw={600}
+                                    >{showtime.matchTitle ?? `Finnkino event ${showtime.finnkinoDbId}`}</Text>
                                     <Text size="sm" c="dimmed">
-                                        {showtime.theatre}
+                                        Area {showtime.areaId}
                                     </Text>
-                                    <Text size="sm">{dayjs(showtime.startsAt).format("dddd, MMM D YYYY HH:mm")}</Text>
-                                    <Text size="xs" c="dimmed">
-                                        Added by {addedBy?.name ?? "Member"}
+                                    <Text size="sm">
+                                        {date.isValid() ? date.format("dddd, MMM D YYYY") : showtime.dateOfShow}
                                     </Text>
-                                    {showtime.notes && (
-                                        <Text size="sm" c="dimmed">
-                                            {showtime.notes}
-                                        </Text>
+                                    {showtime.theatreName && (
+                                        <Text size="xs" c="dimmed">{showtime.theatreName}</Text>
                                     )}
                                 </Stack>
-                                {isOwner && (
-                                    <Tooltip label="Remove showtime" withArrow>
+                                <Group gap="xs">
+                                    <Tooltip label="Open in Finnkino" withArrow>
                                         <ActionIcon
-                                            variant="light"
-                                            color="red"
-                                            onClick={() => onRemoveShowtime(showtime.id)}
-                                            aria-label="Remove showtime"
+                                            component="a"
+                                            href={getFinnkinoUrl(showtime.finnkinoDbId)}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            variant="subtle"
+                                            aria-label="Open showtime on Finnkino"
                                         >
-                                            <IconTrash size={18}/>
+                                            <IconExternalLink size={18}/>
                                         </ActionIcon>
                                     </Tooltip>
-                                )}
+                                    {isOwner && (
+                                        <Tooltip label="Remove showtime" withArrow>
+                                            <ActionIcon
+                                                variant="light"
+                                                color="red"
+                                                onClick={() => onRemoveShowtime(showtime.id)}
+                                                aria-label="Remove showtime"
+                                                disabled={isBusy}
+                                            >
+                                                <IconTrash size={18}/>
+                                            </ActionIcon>
+                                        </Tooltip>
+                                    )}
+                                </Group>
                             </Group>
                         </Card>
                     )

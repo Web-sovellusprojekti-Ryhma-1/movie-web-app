@@ -7,13 +7,13 @@ import {useEffect, useState} from "react";
 import {useLocation, useParams} from "wouter";
 import {GetUserFavorites} from "../api/Favorite";
 import {ReviewByUserId} from "../api/Review";
-import {DeleteUserAccount, UserByIdRequest} from "../api/User";
+import {deleteUserAccount, getUserById} from "../api/User";
 import {ConfirmationWindow} from "../components/ConfirmationWindow";
-import type { FavoriteType } from "../types/favorite";
 import Favorites from "../components/Favorites";
-import type { ReviewType } from "../types/review";
 import Reviews from "../components/Reviews";
 import {UseAuth} from "../context/AuthProvider";
+import type {FavoriteType} from "../types/favorite";
+import type {ReviewType} from "../types/review";
 
 
 interface UserTypeFromIdRequest {
@@ -41,8 +41,7 @@ const UserView = () => {
                 setLoading(true);
                 // Fetch user
                 const userId = Number(id)
-                const response = await UserByIdRequest(userId) as {data: UserTypeFromIdRequest}
-                const userData = response.data
+                const userData = await getUserById(userId)
                 setProfileUser(userData)
 
                 // Fetch user reviews, favorites
@@ -66,7 +65,7 @@ const UserView = () => {
     const handleResult = async (confirmed: boolean) => {
         close()
         if (confirmed) {
-            await DeleteUserAccount()
+            await deleteUserAccount()
             notifications.show({
                 title: "Success",
                 message: "Account deleted successfully",
@@ -100,9 +99,9 @@ const UserView = () => {
                     </div>
                     {ShowUserDeletionButton}
                 </Group>
-                
+
                 <Group ml={120}>
-                    
+
                     <Reviews reviews={MovieReviews} goToMoviePage={true}/>
                     <Space h="md"/>
                     <Favorites favorites={UserFavorites}/>

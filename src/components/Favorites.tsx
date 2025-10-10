@@ -2,7 +2,7 @@ import {Box, Flex, Image, Paper, ScrollArea, Text} from "@mantine/core";
 import React, {useEffect, useState} from "react";
 import {useLocation} from "wouter";
 import {getMovieDetails} from "../api/tmdb";
-import type { FavoriteType } from "../types/favorite";
+import type {FavoriteType} from "../types/favorite";
 
 interface FavoritesProps {
     favorites: FavoriteType[];
