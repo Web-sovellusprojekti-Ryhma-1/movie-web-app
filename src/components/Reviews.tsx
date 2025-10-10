@@ -15,6 +15,8 @@ const Reviews: React.FC<ReviewProps> = ({reviews, goToMoviePage}) => {
     const [opened, {open, close}] = useDisclosure(false);
     const [reviewsList, setReviewsList] = useState(reviews);
 
+    
+
     useEffect(() => {
         setReviewsList(reviews);
     }, [reviews]);
@@ -45,55 +47,63 @@ const Reviews: React.FC<ReviewProps> = ({reviews, goToMoviePage}) => {
                                 gap: 16,
                             }}
                         >
-                            {reviewsList.map((rev) => (
-                                <Card
-                                    key={rev.tmdb_id}
-                                    shadow="xs"
-                                    withBorder
-                                    radius="md"
-                                    p="md"
-                                    style={{width: 220, height: 220, flex: '0 0 auto'}}
-                                >
-                                    <Card.Section>
-                                        <Anchor
-                                            c="black" fz="lg" fw={600} mt="xs" ml="xs"
-                                            onClick={() => {
-                                                setOpenReview(rev)
-                                                open()
-                                            }}
-                                            style={{
-                                                display: 'block',
-                                                width: 210,
-                                                whiteSpace: 'nowrap',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis',
-                                            }}
-                                        >
-                                            {rev.title}
-                                        </Anchor>
-                                        <Text fz="xs" mt="auto" ml="xs">
-                                            {rev.user_email}
-                                        </Text>
-                                    </Card.Section>
+                            {reviewsList.map((rev) => {
+                              const reviewDate = new Date(rev.reviewed_at)
 
-                                    <div style={{flex: 1}}>
-                                        <Text
-                                            fz="sm" mt="xs"
-                                            lineClamp={5}
-                                        >
-                                            {rev.body}
-                                        </Text>
-                                    </div>
+                              return (
+                                  <Card
+                                      key={rev.tmdb_id}
+                                      shadow="xs"
+                                      withBorder
+                                      radius="md"
+                                      p="md"
+                                      style={{width: 220, height: 220, flex: '0 0 auto'}}
+                                  >
+                                      <Card.Section>
+                                          <Anchor
+                                              c="black" fz="lg" fw={600} mt="xs" ml="xs"
+                                              onClick={() => {
+                                                  setOpenReview(rev)
+                                                  open()
+                                              }}
+                                              style={{
+                                                  display: 'block',
+                                                  width: 210,
+                                                  whiteSpace: 'nowrap',
+                                                  overflow: 'hidden',
+                                                  textOverflow: 'ellipsis',
+                                              }}
+                                          >
+                                              {rev.title}
+                                          </Anchor>
+                                          <Text fz="xs" mt="auto" ml="xs">
+                                              {rev.user_email}
+                                          </Text>
+                                      </Card.Section>
 
-                                    <Text mt="auto" c="dimmed">
-                                        <Rating value={rev.rating} readOnly/>
-                                    </Text>
+                                      <div style={{flex: 1}}>
+                                          <Text
+                                              fz="sm" mt="xs"
+                                              lineClamp={5}
+                                          >
+                                              {rev.body}
+                                          </Text>
+                                      </div>
 
-                                    <Text fz="xs" mt="auto" c="dimmed">
-                                        {rev.reviewed_at}
-                                    </Text>
-                                </Card>
-                            ))}
+                                      <Text mt="auto" c="dimmed">
+                                          <Rating value={rev.rating} readOnly/>
+                                      </Text>
+
+                                      <Text fz="xs" mt="auto" c="dimmed">
+                                          {reviewDate.toLocaleDateString("en-US", {
+                                            month: "long",
+                                            day: "numeric",
+                                            year: "numeric",
+                                          })}
+                                      </Text>
+                                  </Card>
+                              )
+                            })}
                         </div>
                     </ScrollArea>
                 </Paper>
