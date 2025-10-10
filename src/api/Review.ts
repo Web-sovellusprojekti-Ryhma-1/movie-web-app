@@ -11,6 +11,11 @@ export const AllReviewsByTmdbId = async (id: number) => {
     return response.data
 }
 
+export const UpdateReview = async (reviewData: PostReviewType) => {
+    const response = await axiosPrivate.put(`api/review`, reviewData)
+    return response.data
+}
+
 export const PostReview = async (reviewData: PostReviewType) => {
     const response = await axiosPrivate.post(`api/review`, reviewData)
     return response.data

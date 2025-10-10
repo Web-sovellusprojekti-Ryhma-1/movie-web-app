@@ -22,7 +22,7 @@ import React, {useEffect, useMemo, useState} from "react";
 import {DeleteFavorite, GetUserFavorites, PostFavorite} from "../api/Favorite";
 import {fetchShowtimes, fetchTheatreAreas, type FinnkinoTheatreAreasResponse,} from "../api/finnkinoapi";
 import {createGroupShowtime, listGroupsForUser} from "../api/Group";
-import {AllReviewsByTmdbId, PostReview} from "../api/Review";
+import {AllReviewsByTmdbId, PostReview, UpdateReview} from "../api/Review";
 import {UseAuth} from "../context/AuthProvider";
 import {
     type FinnkinoShowtime,
@@ -62,6 +62,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({movie, onClose}) => {
     const [scheduleTarget, setScheduleTarget] = useState<FinnkinoShowtime | null>(null)
     const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null)
     const [scheduleSubmitting, setScheduleSubmitting] = useState(false)
+    const [movieReviewIsWritten, setMovieReviewIsWritten] = useState(false)
 
     const {user} = UseAuth();
     const isAuthenticated = user !== null;
@@ -87,6 +88,16 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({movie, onClose}) => {
     const postMovieReview = async (movieReview: PostReviewType) => {
         try {
             await PostReview(movieReview)
+            setNewReviewPosted(true)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const updateMovieReview = async (movieReview: PostReviewType) => {
+        try {
+            console.log("UPDATE 2")
+            await UpdateReview(movieReview)
             setNewReviewPosted(true)
         } catch (error) {
             console.log(error)
@@ -140,8 +151,28 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({movie, onClose}) => {
                 console.log(error)
             }
         }
+        
         isMovieFavorited()
     }, [])
+
+    useEffect(() => {
+        const isMovieReviewed = () => {
+            const isMovieReviewed = reviews.some(
+                (rev: {user_id: number}) => rev.user_id == user?.id
+            )
+            setMovieReviewIsWritten(isMovieReviewed)
+        }
+
+        const updateReviewTextBox = () => {
+            const currentUserReview = reviews.find(rev => rev.user_id == user?.id);
+            const newReviewBody = currentUserReview?.body
+            const newReviewRating =
+            setNewReview(newReviewBody ?? "")
+            setNewRating(newReviewRating ?? 0)
+        }
+        isMovieReviewed()
+        updateReviewTextBox()
+    }, [reviews])
 
     useEffect(() => {
         if (!isAuthenticated || !user?.id) {
@@ -335,17 +366,26 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({movie, onClose}) => {
     // riviewille funktio parametrit
     const addReview = () => {
         if (newReview.trim() && newRating != 0) {
-            postMovieReview({
-                review: {
-                    title: movie.title,
-                    body: newReview,
-                    rating: newRating,
-                    tmdb_id: movie.id
-                }
-            })
-
-            setNewReview("")
-            setNewRating(0)
+            if (!movieReviewIsWritten) {
+                postMovieReview({
+                    review: {
+                        title: movie.title,
+                        body: newReview,
+                        rating: newRating,
+                        tmdb_id: movie.id
+                    }
+                })
+            } else {
+                updateMovieReview({
+                    review: {
+                        title: movie.title,
+                        body: newReview,
+                        rating: newRating,
+                        tmdb_id: movie.id
+                    }
+                })
+            }
+            
             setIsModalOpen(false)
         }
     }
@@ -572,10 +612,11 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({movie, onClose}) => {
 
                 {/* vieritys palkki jotta voi scrollailla arvosteluja */}
                 <Reviews reviews={reviews} goToMoviePage={false}/>
-
-                <Button style={{marginTop: "1rem"}} onClick={() => WriteReviewButton()}>
-                    Write a review
-                </Button> {/* modaalin triggeröivä nappi */}
+                
+                    <Button style={{marginTop: "1rem"}} onClick={() => WriteReviewButton()}>
+                    {!movieReviewIsWritten ? "Write a review" : "Edit review"}
+                    </Button> 
+                    {/* modaalin triggeröivä nappi */}
 
                 <Modal
                     opened={isModalOpen} onClose={() => setIsModalOpen(false)} title="Add a Review"
@@ -596,7 +637,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({movie, onClose}) => {
                     />
                     <Group mt="md">
                         <Button variant="default" onClick={() => setIsModalOpen(false)}>Cancel</Button>
-                        <Button onClick={addReview}>Post Review</Button>
+                        <Button onClick={addReview}>{!movieReviewIsWritten ? "Post Review" : "Save changes"}</Button>
                     </Group>
                 </Modal>
             </Box>
