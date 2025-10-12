@@ -45,6 +45,7 @@ export function GroupShowtimesSection({
             <Stack gap="md">
                 {sortedShowtimes.map((showtime) => {
                     const date = dayjs(showtime.dateOfShow)
+                    const time = dayjs(showtime.timeOfShow)
                     return (
                         <Card key={showtime.id} withBorder padding="md" radius="md" shadow="xs">
                             <Group justify="space-between" align="flex-start">
@@ -57,6 +58,9 @@ export function GroupShowtimesSection({
                                     </Text>
                                     <Text size="sm">
                                         {date.isValid() ? date.format("dddd, MMM D YYYY") : showtime.dateOfShow}
+                                    </Text>
+                                    <Text size="sm">
+                                        {time.isValid() ? time.format("HH:MM") : showtime.timeOfShow}
                                     </Text>
                                     {showtime.theatreName && (
                                         <Text size="xs" c="dimmed">{showtime.theatreName}</Text>

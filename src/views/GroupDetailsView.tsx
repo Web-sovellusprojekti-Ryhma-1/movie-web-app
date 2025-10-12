@@ -163,6 +163,7 @@ const GroupDetailsView = () => {
                 finnkinoDbId: item.finnkino_db_id,
                 areaId: item.area_id,
                 dateOfShow: item.dateofshow,
+                timeOfShow: item.timeofshow,
                 createdAt: item.created_at ?? null,
             }))
 
@@ -342,11 +343,13 @@ const GroupDetailsView = () => {
         setIsBusy(true)
         try {
             const formattedDate = dayjs(values.date).format("YYYY-MM-DD")
+            const formattedTime = dayjs(values.date).format("HH-MM")
             const record = await createGroupShowtime(groupId, {
                 showtime: {
                     finnkino_db_id: values.finnkinoDbId.trim(),
                     area_id: values.areaId.trim(),
                     dateofshow: formattedDate,
+                    timeofshow: formattedTime,
                 },
             })
             setGroupDetails((prev) => {
@@ -356,6 +359,7 @@ const GroupDetailsView = () => {
                     finnkinoDbId: record.finnkino_db_id,
                     areaId: record.area_id,
                     dateOfShow: record.dateofshow,
+                    timeOfShow: record.timeofshow,
                     createdAt: record.created_at ?? null,
                 }
                 return {
