@@ -11,7 +11,7 @@ interface AddGroupMemberPayload {
 }
 
 interface CreateGroupShowtimePayload {
-    showtime: {finnkino_db_id: string; area_id: string; dateofshow: string}
+    showtime: {finnkino_db_id: string; area_id: string; dateofshow: string; timeofshow: string}
 }
 
 const normaliseRows = <T>(payload: PostgresResult<T> | T[] | null | undefined): T[] => {
