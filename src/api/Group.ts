@@ -11,7 +11,7 @@ interface AddGroupMemberPayload {
 }
 
 interface CreateGroupShowtimePayload {
-    showtime: {finnkino_db_id: string; area_id: string; dateofshow: string; timeofshow: string}
+    showtime: {finnkino_db_id: string; area_id: string; dateofshow: string; timeofshow: string; movie_name: string; movie_area: string}
 }
 
 const normaliseRows = <T>(payload: PostgresResult<T> | T[] | null | undefined): T[] => {
@@ -27,6 +27,11 @@ const normaliseRows = <T>(payload: PostgresResult<T> | T[] | null | undefined): 
     }
 
     return []
+}
+
+export const getAllGroups = async (): Promise<GroupRecord> => {
+    const {data} = await axiosPrivate.get<ApiResponse<GroupRecord>>(`api/group`)
+    return data.data
 }
 
 export const getGroupById = async (id: number): Promise<GroupRecord> => {

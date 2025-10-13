@@ -120,6 +120,8 @@ const GroupsListView = () => {
                         id: item.id,
                         finnkinoDbId: item.finnkino_db_id,
                         areaId: item.area_id,
+                        movieName: item.movie_name,
+                        movieArea: item.movie_area,
                         dateOfShow: item.dateofshow,
                         timeOfShow: item.timeofshow,
                         createdAt: item.created_at ?? null,

@@ -5,7 +5,6 @@ import {
     Group,
     Loader,
     Modal,
-    NumberInput,
     SimpleGrid,
     Stack,
     Text,
@@ -30,7 +29,7 @@ import {
     removeGroupMember,
     removeGroupShowtime,
 } from "../api/Group"
-import {getUserById} from "../api/User"
+import {getUserById, getUserByEmail} from "../api/User"
 import {GroupHeader} from "../components/groups/GroupHeader"
 import {GroupMembersSection} from "../components/groups/GroupMembersSection"
 import {GroupShowtimesSection} from "../components/groups/GroupShowtimesSection"
@@ -56,13 +55,13 @@ const GroupDetailsView = () => {
 
     const inviteForm = useForm({
         initialValues: {
-            userId: undefined as number | undefined,
+            userEmail: undefined as string | undefined,
         },
         validate: {
-            userId: (value) =>
-                typeof value === "number" && Number.isInteger(value) && value > 0
+            userEmail: (value) =>
+                typeof value === "string"
                     ? null
-                    : "Enter a valid user ID",
+                    : "Enter a valid user email",
         },
     })
 
@@ -162,6 +161,8 @@ const GroupDetailsView = () => {
                 id: item.id,
                 finnkinoDbId: item.finnkino_db_id,
                 areaId: item.area_id,
+                movieName: item.movie_name,
+                movieArea: item.movie_area,
                 dateOfShow: item.dateofshow,
                 timeOfShow: item.timeofshow,
                 createdAt: item.created_at ?? null,
@@ -297,11 +298,12 @@ const GroupDetailsView = () => {
     }
 
     const handleInviteMember = async (values: typeof inviteForm.values) => {
-        if (!groupId || values.userId === undefined) return
+        if (!groupId || values.userEmail === undefined) return
         setIsBusy(true)
         try {
-            const record = await inviteGroupMember({member: {group_id: groupId, user_id: values.userId}})
-            const userRecord = await fetchUser(record.user_id)
+            const user = await getUserByEmail(values.userEmail)
+            const record = await inviteGroupMember({member: {group_id: groupId, user_id: user.id}})
+            const userRecord = user
             setGroupDetails((prev) => {
                 if (!prev) return prev
                 if (prev.members.some((member) => member.userId === record.user_id)) {
@@ -350,6 +352,8 @@ const GroupDetailsView = () => {
                     area_id: values.areaId.trim(),
                     dateofshow: formattedDate,
                     timeofshow: formattedTime,
+                    movie_name: "",
+                    movie_area: "",
                 },
             })
             setGroupDetails((prev) => {
@@ -360,6 +364,8 @@ const GroupDetailsView = () => {
                     areaId: record.area_id,
                     dateOfShow: record.dateofshow,
                     timeOfShow: record.timeofshow,
+                    movieName: record.movie_name,
+                    movieArea: record.movie_area,
                     createdAt: record.created_at ?? null,
                 }
                 return {
@@ -560,13 +566,12 @@ const GroupDetailsView = () => {
             >
                 <form onSubmit={inviteForm.onSubmit(handleInviteMember)}>
                     <Stack gap="md">
-                        <NumberInput
-                            label="User ID"
-                            description="Provide the numeric ID of the user you want to invite."
+                        <TextInput
+                            required
+                            label="User Email"
+                            description="Provide the email of the user you want to invite."
                             withAsterisk
-                            min={1}
-                            clampBehavior="strict"
-                            {...inviteForm.getInputProps("userId")}
+                            {...inviteForm.getInputProps("userEmail")}
                         />
                         <Group justify="flex-end">
                             <Button

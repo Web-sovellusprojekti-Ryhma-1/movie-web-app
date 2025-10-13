@@ -486,8 +486,10 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({movie, onClose}) => {
                 showtime: {
                     finnkino_db_id: finnkinoId,
                     area_id: areaId,
-                    dateofshow: dayjs(scheduleTarget.start).format("YYYY-MM-DD"),
-                    timeofshow: dayjs(scheduleTarget.start).format("HH:mm")
+                    dateofshow: dayjs(selectedDate).format("YYYY-MM-DD"),
+                    timeofshow: dayjs(scheduleTarget.start).format("HH:mm"),
+                    movie_name: scheduleTarget.originalTitle || "",
+                    movie_area: scheduleTarget.theatre || ""
                 },
             })
             const targetGroup = userGroups.find((group) => group.id === groupId)

@@ -52,9 +52,9 @@ export function GroupShowtimesSection({
                                 <Stack gap={4}>
                                     <Text
                                         fw={600}
-                                    >{showtime.matchTitle ?? `Finnkino event ${showtime.finnkinoDbId}`}</Text>
+                                    >{showtime.matchTitle ?? `${showtime.movieName}`}</Text>
                                     <Text size="sm" c="dimmed">
-                                        Area {showtime.areaId}
+                                        {showtime.movieArea}
                                     </Text>
                                     <Text size="sm">
                                         {date.isValid() ? date.format("dddd, MMM D YYYY") : showtime.dateOfShow}
