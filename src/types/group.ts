@@ -27,6 +27,8 @@ export interface GroupShowtimeRecord {
     group_id: number
     finnkino_db_id: string
     area_id: string
+    movie_name: string
+    movie_area: string
     dateofshow: string
     timeofshow: string
     created_at?: string | null
@@ -36,6 +38,8 @@ export interface GroupShowtimeDetail {
     id: number
     finnkinoDbId: string
     areaId: string
+    movieName: string
+    movieArea: string
     dateOfShow: string
     timeOfShow: string
     createdAt?: string | null

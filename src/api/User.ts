@@ -7,6 +7,11 @@ export const getUserById = async (id: number): Promise<UserRecord> => {
     return data.data
 }
 
+export const getUserByEmail = async (email: string): Promise<UserRecord> => {
+    const {data} = await axiosPrivate.get<ApiResponse<UserRecord>>(`api/user/email`, { params: {email} })
+    return data.data
+}
+
 export const deleteUserAccount = async (): Promise<UserRecord | null> => {
     const {data} = await axiosPrivate.delete<ApiResponse<UserRecord | null>>("api/user/deletecurrentuser")
     return data.data
